@@ -16,3 +16,15 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Admin Routes
+Route::prefix('admin')->group(function () {
+    Route::get('/login', [App\Http\Controllers\AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [App\Http\Controllers\AdminController::class, 'login']);
+    Route::post('/logout', [App\Http\Controllers\AdminController::class, 'logout'])->name('admin.logout');
+    
+    // Protected admin routes
+    Route::middleware('admin')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+    });
+});
