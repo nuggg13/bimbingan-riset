@@ -53,5 +53,12 @@ Route::prefix('admin')->group(function () {
     // Protected admin routes
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/pendaftaran', [App\Http\Controllers\PendaftaranController::class, 'index'])->name('admin.pendaftaran.index');
+        Route::patch('/pendaftaran/{pendaftaran}/status', [App\Http\Controllers\PendaftaranController::class, 'updateStatus'])->name('admin.pendaftaran.updateStatus');
+        Route::get('/pendaftaran/export', [App\Http\Controllers\PendaftaranController::class, 'export'])->name('admin.pendaftaran.export');
+        
+        // Mentor Routes
+        Route::resource('mentor', App\Http\Controllers\MentorController::class, ['as' => 'admin']);
+        Route::get('/mentor/export', [App\Http\Controllers\MentorController::class, 'export'])->name('admin.mentor.export');
     });
 });

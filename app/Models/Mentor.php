@@ -2,24 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class Peserta extends Authenticatable
+class Mentor extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasFactory, Notifiable;
 
-    protected $table = 'peserta';
-    protected $primaryKey = 'id_peserta';
+    protected $table = 'mentor';
+    protected $primaryKey = 'id_mentor';
 
     protected $fillable = [
         'nama',
         'email',
         'password',
         'nomor_wa',
-        'instansi',
-        'fakultas',
+        'keahlian',
     ];
 
     protected $hidden = [
@@ -35,10 +35,5 @@ class Peserta extends Authenticatable
     public function getAuthPassword()
     {
         return $this->password;
-    }
-
-    public function pendaftaran()
-    {
-        return $this->hasOne(Pendaftaran::class, 'id_peserta');
     }
 }

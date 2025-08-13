@@ -10,13 +10,18 @@ class Pendaftaran extends Model
     use HasFactory;
 
     protected $table = 'pendaftaran';
+
     protected $primaryKey = 'id_pendaftaran';
+
+    public $timestamps = true;
+
 
     protected $fillable = [
         'id_peserta',
         'judul_riset',
         'penjelasan',
         'minat_keilmuan',
+
         'basis_sistem',
         'status',
     ];
