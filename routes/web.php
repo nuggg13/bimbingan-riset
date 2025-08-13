@@ -14,7 +14,34 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('register.step1');
+});
+
+// Registration Routes
+Route::prefix('register')->group(function () {
+    Route::get('/step1', [App\Http\Controllers\RegistrationController::class, 'showStep1'])->name('register.step1');
+    Route::post('/step1', [App\Http\Controllers\RegistrationController::class, 'processStep1'])->name('register.step1.process');
+    Route::get('/step2', [App\Http\Controllers\RegistrationController::class, 'showStep2'])->name('register.step2');
+    Route::post('/step2', [App\Http\Controllers\RegistrationController::class, 'processStep2'])->name('register.step2.process');
+    Route::get('/success', [App\Http\Controllers\RegistrationController::class, 'showStep3'])->name('register.success');
+    
+    // Clear session route for success page
+    Route::post('/clear-session', function () {
+        session()->forget('registration_success');
+        return response()->json(['status' => 'success']);
+    })->name('register.clear-session');
+});
+
+// Peserta Authentication Routes
+Route::prefix('peserta')->group(function () {
+    Route::get('/login', [App\Http\Controllers\PesertaAuthController::class, 'showLoginForm'])->name('peserta.login');
+    Route::post('/login', [App\Http\Controllers\PesertaAuthController::class, 'login'])->name('peserta.login.process');
+    Route::post('/logout', [App\Http\Controllers\PesertaAuthController::class, 'logout'])->name('peserta.logout');
+    
+    // Protected peserta routes
+    Route::middleware('peserta')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\PesertaDashboardController::class, 'dashboard'])->name('peserta.dashboard');
+    });
 });
 
 // Admin Routes
