@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
+use App\Models\Peserta;
+use App\Models\Pendaftaran;
 
 class AdminController extends Controller
 {
@@ -43,6 +45,13 @@ class AdminController extends Controller
     public function dashboard()
     {
         $admin = Auth::guard('admin')->user();
-        return view('admin.dashboard', compact('admin'));
+        
+        // Ambil data real dari database
+        $totalMahasiswa = Peserta::count();
+        $totalPendaftaran = Pendaftaran::count();
+        $totalPending = Pendaftaran::where('status', 'pending')->count();
+        $totalMentor = 0; // Belum ada tabel mentor, jadi tetap 0
+        
+        return view('admin.dashboard', compact('admin', 'totalMahasiswa', 'totalPendaftaran', 'totalPending', 'totalMentor'));
     }
 }
