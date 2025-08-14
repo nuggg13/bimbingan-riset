@@ -54,11 +54,17 @@ Route::prefix('admin')->group(function () {
     Route::middleware('admin')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/pendaftaran', [App\Http\Controllers\PendaftaranController::class, 'index'])->name('admin.pendaftaran.index');
-        Route::patch('/pendaftaran/{pendaftaran}/status', [App\Http\Controllers\PendaftaranController::class, 'updateStatus'])->name('admin.pendaftaran.updateStatus');
+        Route::patch('/pendaftaran/{id}/status', [App\Http\Controllers\PendaftaranController::class, 'updateStatus'])->name('admin.pendaftaran.updateStatus');
+        Route::post('/pendaftaran/{id}/schedule', [App\Http\Controllers\PendaftaranController::class, 'createSchedule'])->name('admin.pendaftaran.createSchedule');
         Route::get('/pendaftaran/export', [App\Http\Controllers\PendaftaranController::class, 'export'])->name('admin.pendaftaran.export');
         
         // Mentor Routes
         Route::resource('mentor', App\Http\Controllers\MentorController::class, ['as' => 'admin']);
         Route::get('/mentor/export', [App\Http\Controllers\MentorController::class, 'export'])->name('admin.mentor.export');
+        
+        // Jadwal Routes
+        Route::resource('jadwal', App\Http\Controllers\JadwalController::class, ['as' => 'admin']);
+        Route::patch('/jadwal/{id}/status', [App\Http\Controllers\JadwalController::class, 'updateStatus'])->name('admin.jadwal.updateStatus');
+        Route::get('/jadwal/export', [App\Http\Controllers\JadwalController::class, 'export'])->name('admin.jadwal.export');
     });
 });

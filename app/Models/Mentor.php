@@ -36,4 +36,10 @@ class Mentor extends Authenticatable
     {
         return $this->password;
     }
+
+    // Relasi ke Jadwal
+    public function jadwal()
+    {
+        return $this->hasMany(Jadwal::class, 'id_mentor', 'id_mentor');
+    }
 }

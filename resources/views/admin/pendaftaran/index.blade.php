@@ -62,6 +62,32 @@
      </div>
  @endif
 
+ @if (session('error'))
+     <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center justify-between">
+         <div class="flex items-center">
+             <i class="fas fa-exclamation-circle mr-2 text-red-600"></i>
+             <span class="font-medium">{{ session('error') }}</span>
+         </div>
+         <button type="button" class="text-red-600 hover:text-red-800" onclick="this.parentElement.remove()">
+             <i class="fas fa-times"></i>
+         </button>
+     </div>
+ @endif
+
+ @if ($errors->any())
+     <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+         <div class="flex items-center mb-2">
+             <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+             <span class="font-medium">Terjadi kesalahan:</span>
+         </div>
+         <ul class="list-disc list-inside text-sm">
+             @foreach ($errors->all() as $error)
+                 <li>{{ $error }}</li>
+             @endforeach
+         </ul>
+     </div>
+ @endif
+
 <!-- Statistics Section -->
 <div class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-6">
     <a href="{{ route('admin.pendaftaran.index') }}" class="bg-white shadow rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer {{ !request('status') || request('status') === 'semua' ? 'ring-2 ring-blue-500' : '' }}" title="Lihat semua pendaftaran">
@@ -277,22 +303,30 @@
                                 'konsultasi' => 'bg-purple-100 text-purple-800',
                             ][$status] ?? 'bg-gray-100 text-gray-800';
                         @endphp
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $badgeClass }}">
-                            {{ ucfirst($status) }}
-                        </span>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $badgeClass }}">
+                                {{ ucfirst($status) }}
+                            </span>
+                            @if($row->status === 'diterima' && $row->jadwal)
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="Jadwal bimbingan telah dibuat">
+                                    <i class="fas fa-calendar-check mr-1"></i>
+                                    Terjadwal
+                                </span>
+                            @endif
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <form method="POST" action="{{ route('admin.pendaftaran.updateStatus', $row->id_pendaftaran) }}" class="flex items-center space-x-2">
+                        <form class="status-update-form flex items-center space-x-2" data-id="{{ $row->id_pendaftaran }}">
                             @csrf
                             @method('PATCH')
-                            <select name="status" class="border-gray-300 rounded-lg text-sm px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="diterima" {{ $row->status === 'diterima' ? 'selected' : '' }}>diterima</option>
-                                <option value="ditolak" {{ $row->status === 'ditolak' ? 'selected' : '' }}>ditolak</option>
-                                <option value="pending" {{ $row->status === 'pending' ? 'selected' : '' }}>pending</option>
-                                <option value="review" {{ $row->status === 'review' ? 'selected' : '' }}>review</option>
-                                <option value="konsultasi" {{ $row->status === 'konsultasi' ? 'selected' : '' }}>konsultasi</option>
+                            <select name="status" class="border-gray-300 rounded-lg text-sm px-2 py-1 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="diterima" {{ $row->status === 'diterima' ? 'selected' : '' }}>Diterima</option>
+                                <option value="ditolak" {{ $row->status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                <option value="pending" {{ $row->status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                <option value="review" {{ $row->status === 'review' ? 'selected' : '' }}>Review</option>
+                                <option value="konsultasi" {{ $row->status === 'konsultasi' ? 'selected' : '' }}>Konsultasi</option>
                             </select>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors duration-200" onclick="showStatusUpdateLoading(this)">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors duration-200">
                                 Ubah
                             </button>
                         </form>
@@ -376,6 +410,55 @@
 
             <!-- Content -->
             <div class="p-8 overflow-y-auto flex-1">
+                @if($row->status === 'diterima' && $row->jadwal)
+                    <!-- Jadwal Bimbingan Section -->
+                    <div class="mb-8 bg-green-50 border border-green-200 rounded-xl p-6">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-calendar-check text-green-600 text-xs"></i>
+                            </div>
+                            <h4 class="font-bold text-green-800 text-lg">Jadwal Bimbingan</h4>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                {{ ucfirst($row->jadwal->status) }}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Mentor</p>
+                                    <p class="text-sm font-medium text-green-900">{{ $row->jadwal->mentor->nama ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Periode</p>
+                                    <p class="text-sm text-green-900">
+                                        {{ $row->jadwal->tanggal_mulai ? \Carbon\Carbon::parse($row->jadwal->tanggal_mulai)->format('d/m/Y') : 'N/A' }} - 
+                                        {{ $row->jadwal->tanggal_akhir ? \Carbon\Carbon::parse($row->jadwal->tanggal_akhir)->format('d/m/Y') : 'N/A' }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Jam Bimbingan</p>
+                                    <p class="text-sm text-green-900">{{ $row->jadwal->jam_mulai }} - {{ $row->jadwal->jam_akhir }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">Kontak Mentor</p>
+                                    @if($row->jadwal->mentor && $row->jadwal->mentor->nomor_wa)
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $row->jadwal->mentor->nomor_wa) }}" 
+                                           target="_blank"
+                                           class="text-sm text-green-600 hover:text-green-800 flex items-center">
+                                            <i class="fab fa-whatsapp mr-1"></i>
+                                            {{ $row->jadwal->mentor->nomor_wa }}
+                                        </a>
+                                    @else
+                                        <p class="text-sm text-green-700">Tidak tersedia</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+                
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <!-- Data Pendaftaran -->
                     <div class="space-y-6">
@@ -507,11 +590,122 @@
     </div>
 </div>
 @endforeach
+
+<!-- Modal Jadwal Bimbingan -->
+<div id="schedule-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300"></div>
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-600 to-emerald-700 px-8 py-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-calendar-plus text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Buat Jadwal Bimbingan</h3>
+                            <p class="text-green-100 text-sm" id="schedule-modal-subtitle">Pendaftaran telah diterima</p>
+                        </div>
+                    </div>
+                    <button id="close-schedule-modal" class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors duration-200">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <form id="schedule-form" class="p-8 space-y-6">
+                @csrf
+                
+                <!-- Mentor Selection -->
+                <div>
+                    <label for="id_mentor" class="block text-sm font-medium text-gray-700 mb-2">
+                        Pilih Mentor <span class="text-red-500">*</span>
+                    </label>
+                    <select name="id_mentor" id="id_mentor" required
+                            class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        <option value="">-- Pilih Mentor --</option>
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Pilih mentor yang akan membimbing peserta</p>
+                </div>
+
+                <!-- Date Range -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="tanggal_mulai" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tanggal Mulai <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" required
+                               class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label for="tanggal_akhir" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tanggal Akhir <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" name="tanggal_akhir" id="tanggal_akhir" required
+                               class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+
+                <!-- Time Range -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="jam_mulai" class="block text-sm font-medium text-gray-700 mb-2">
+                            Jam Mulai <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" name="jam_mulai" id="jam_mulai" value="09:00" required
+                               class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label for="jam_akhir" class="block text-sm font-medium text-gray-700 mb-2">
+                            Jam Akhir <span class="text-red-500">*</span>
+                        </label>
+                        <input type="time" name="jam_akhir" id="jam_akhir" value="17:00" required
+                               class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-3"></i>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-medium mb-1">Informasi Jadwal:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Tanggal mulai tidak boleh kurang dari hari ini</li>
+                                <li>Tanggal akhir harus setelah tanggal mulai</li>
+                                <li>Jam akhir harus setelah jam mulai</li>
+                                <li><strong>Status otomatis:</strong> "scheduled" jika tanggal mulai > hari ini, "ongoing" jika sedang berlangsung, "completed" jika sudah selesai</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                    <button type="button" id="cancel-schedule" 
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                        <i class="fas fa-calendar-plus mr-2"></i>
+                        Buat Jadwal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 
 @push('scripts')
 <script>
+let currentPendaftaranId = null;
+
 // Gunakan event delegation agar bekerja untuk elemen dinamis/paginated
 document.addEventListener('click', function (e) {
   const openBtn = e.target.closest('[data-modal-target]');
@@ -528,6 +722,261 @@ document.addEventListener('click', function (e) {
     return;
   }
 });
+
+// Handle status update form submission
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle status update forms
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('status-update-form')) {
+            e.preventDefault();
+            handleStatusUpdate(e.target);
+        }
+    });
+
+    // Handle schedule modal
+    const scheduleModal = document.getElementById('schedule-modal');
+    const scheduleForm = document.getElementById('schedule-form');
+    const closeScheduleModal = document.getElementById('close-schedule-modal');
+    const cancelSchedule = document.getElementById('cancel-schedule');
+
+    // Close schedule modal
+    [closeScheduleModal, cancelSchedule].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', function() {
+                scheduleModal.classList.add('hidden');
+                resetScheduleForm();
+            });
+        }
+    });
+
+    // Handle schedule form submission
+    if (scheduleForm) {
+        scheduleForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            handleScheduleSubmission();
+        });
+    }
+
+    // Set minimum date for date inputs
+    const today = new Date().toISOString().split('T')[0];
+    const tanggalMulaiInput = document.getElementById('tanggal_mulai');
+    const tanggalAkhirInput = document.getElementById('tanggal_akhir');
+    
+    if (tanggalMulaiInput) {
+        tanggalMulaiInput.min = today;
+        tanggalMulaiInput.addEventListener('change', function() {
+            if (tanggalAkhirInput) {
+                tanggalAkhirInput.min = this.value;
+            }
+        });
+    }
+});
+
+function handleStatusUpdate(form) {
+    const formData = new FormData(form);
+    const pendaftaranId = form.dataset.id;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    const selectedStatus = formData.get('status');
+
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mengubah...';
+    submitBtn.disabled = true;
+
+    // Make AJAX request
+    fetch(`/admin/pendaftaran/${pendaftaranId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token'),
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: selectedStatus,
+            _method: 'PATCH'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.show_schedule_modal) {
+            // Show schedule modal
+            showScheduleModal(data);
+        } else if (data.success) {
+            // Show success message and reload if needed
+            showNotification(data.message, 'success');
+            if (data.reload) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } else if (data.error) {
+            showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat mengubah status.', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function showScheduleModal(data) {
+    currentPendaftaranId = data.pendaftaran.id_pendaftaran;
+    
+    // Update modal subtitle
+    const subtitle = document.getElementById('schedule-modal-subtitle');
+    if (subtitle) {
+        subtitle.textContent = `Untuk: ${data.peserta_nama}`;
+    }
+
+    // Populate mentor options
+    const mentorSelect = document.getElementById('id_mentor');
+    if (mentorSelect && data.mentors) {
+        mentorSelect.innerHTML = '<option value="">-- Pilih Mentor --</option>';
+        data.mentors.forEach(mentor => {
+            const option = document.createElement('option');
+            option.value = mentor.id_mentor;
+            option.textContent = `${mentor.nama} - ${mentor.keahlian}`;
+            mentorSelect.appendChild(option);
+        });
+    }
+
+    // Set default dates
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() + 3); // 3 days from now
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1); // 1 month later
+
+    const tanggalMulaiInput = document.getElementById('tanggal_mulai');
+    const tanggalAkhirInput = document.getElementById('tanggal_akhir');
+    
+    if (tanggalMulaiInput) {
+        tanggalMulaiInput.value = startDate.toISOString().split('T')[0];
+    }
+    if (tanggalAkhirInput) {
+        tanggalAkhirInput.value = endDate.toISOString().split('T')[0];
+    }
+
+    // Show modal
+    const scheduleModal = document.getElementById('schedule-modal');
+    if (scheduleModal) {
+        scheduleModal.classList.remove('hidden');
+    }
+}
+
+function handleScheduleSubmission() {
+    const form = document.getElementById('schedule-form');
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Membuat Jadwal...';
+    submitBtn.disabled = true;
+
+    // Make AJAX request
+    fetch(`/admin/pendaftaran/${currentPendaftaranId}/schedule`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token'),
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            // Close modal and reload page
+            document.getElementById('schedule-modal').classList.add('hidden');
+            resetScheduleForm();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else if (data.error) {
+            showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Terjadi kesalahan saat membuat jadwal.', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function resetScheduleForm() {
+    const form = document.getElementById('schedule-form');
+    if (form) {
+        form.reset();
+        // Reset default values
+        document.getElementById('jam_mulai').value = '09:00';
+        document.getElementById('jam_akhir').value = '17:00';
+    }
+    currentPendaftaranId = null;
+}
+
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification-toast');
+    existingNotifications.forEach(notification => notification.remove());
+
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification-toast fixed top-4 right-4 z-50 max-w-sm w-full shadow-lg rounded-lg p-4 transition-all duration-300 transform translate-x-full`;
+    
+    let bgColor, textColor, icon;
+    switch (type) {
+        case 'success':
+            bgColor = 'bg-green-50 border border-green-200';
+            textColor = 'text-green-800';
+            icon = 'fas fa-check-circle text-green-600';
+            break;
+        case 'error':
+            bgColor = 'bg-red-50 border border-red-200';
+            textColor = 'text-red-800';
+            icon = 'fas fa-exclamation-circle text-red-600';
+            break;
+        default:
+            bgColor = 'bg-blue-50 border border-blue-200';
+            textColor = 'text-blue-800';
+            icon = 'fas fa-info-circle text-blue-600';
+    }
+
+    notification.className += ` ${bgColor}`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="${icon} mr-2"></i>
+            <span class="font-medium ${textColor}">${message}</span>
+            <button type="button" class="ml-auto ${textColor.replace('text-', 'text-').replace('-800', '-600')} hover:${textColor}" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
+}
 
 // Hide initial loading overlay
 window.addEventListener('load', function() {
@@ -655,6 +1104,16 @@ function showStatusUpdateLoading(button) {
         button.innerHTML = originalText;
         button.disabled = false;
     }, 5000);
+}
+
+// Confirm status update
+function confirmStatusUpdate(form) {
+    const select = form.querySelector('select[name="status"]');
+    const selectedStatus = select.options[select.selectedIndex].text;
+    const currentRow = form.closest('tr');
+    const pesertaName = currentRow.querySelector('td:nth-child(2) .font-medium').textContent.trim();
+    
+    return confirm(`Apakah Anda yakin ingin mengubah status pendaftaran ${pesertaName} menjadi "${selectedStatus}"?`);
 }
 
 // Add loading state for pagination links
