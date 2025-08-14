@@ -61,18 +61,22 @@ class MentorController extends Controller
         return redirect()->route('admin.mentor.index')->with('success', 'Mentor berhasil ditambahkan.');
     }
 
-    public function show(Mentor $mentor)
+    public function show($id)
     {
+        $mentor = Mentor::where('id_mentor', $id)->firstOrFail();
         return view('admin.mentor.show', compact('mentor'));
     }
 
-    public function edit(Mentor $mentor)
+    public function edit($id)
     {
+        $mentor = Mentor::where('id_mentor', $id)->firstOrFail();
         return view('admin.mentor.edit', compact('mentor'));
     }
 
-    public function update(Request $request, Mentor $mentor)
+    public function update(Request $request, $id)
     {
+        $mentor = Mentor::where('id_mentor', $id)->firstOrFail();
+        
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|email|unique:mentor,email,' . $mentor->id_mentor . ',id_mentor',
@@ -96,8 +100,9 @@ class MentorController extends Controller
         return redirect()->route('admin.mentor.index')->with('success', 'Data mentor berhasil diperbarui.');
     }
 
-    public function destroy(Mentor $mentor)
+    public function destroy($id)
     {
+        $mentor = Mentor::where('id_mentor', $id)->firstOrFail();
         $nama = $mentor->nama;
         $mentor->delete();
 

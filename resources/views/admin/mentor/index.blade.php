@@ -38,6 +38,32 @@
     </div>
 @endif
 
+@if (session('error'))
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center justify-between">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2 text-red-600"></i>
+            <span class="font-medium">{{ session('error') }}</span>
+        </div>
+        <button type="button" class="text-red-600 hover:text-red-800" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+        <div class="flex items-center mb-2">
+            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+            <span class="font-medium">Terjadi kesalahan:</span>
+        </div>
+        <ul class="list-disc list-inside text-sm">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 
 <!-- Filter Section -->
 <div class="bg-white shadow rounded-lg mb-6">
@@ -96,10 +122,6 @@
                     <i class="fas fa-list mr-1"></i>
                     Menampilkan {{ $mentor->count() }} dari {{ $mentor->total() }} data
                 </span>
-                <span class="text-sm text-green-600 flex items-center">
-                    <i class="fab fa-whatsapp mr-1"></i>
-                    {{ $statistics['with_wa'] }} dengan WhatsApp
-                </span>
                 @if(request('search'))
                     <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full flex items-center">
                         <i class="fas fa-search mr-1"></i>
@@ -116,9 +138,6 @@
             <div class="text-sm text-gray-500 flex items-center">
                 <i class="fas fa-file-alt mr-1"></i>
                 Halaman {{ $mentor->currentPage() }} dari {{ $mentor->lastPage() }}
-                <span class="mx-2">•</span>
-                <i class="fab fa-whatsapp mr-1 text-green-600"></i>
-                {{ round(($statistics['with_wa'] / max($statistics['total'], 1)) * 100, 1) }}% coverage WA
             </div>
         </div>
     </div>
@@ -172,13 +191,13 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ optional($row->created_at)->format('d/m/Y H:i') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('admin.mentor.show', $row) }}" class="text-blue-600 hover:text-blue-900" title="Detail">
+                            <a href="{{ route('admin.mentor.show', $row->id_mentor) }}" class="text-blue-600 hover:text-blue-900" title="Detail">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ route('admin.mentor.edit', $row) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit">
+                            <a href="{{ route('admin.mentor.edit', $row->id_mentor) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form method="POST" action="{{ route('admin.mentor.destroy', $row) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mentor {{ $row->nama }}?')">
+                            <form method="POST" action="{{ route('admin.mentor.destroy', $row->id_mentor) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mentor {{ $row->nama }}?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
@@ -231,14 +250,6 @@
         <div class="flex items-center justify-between">
             <div class="text-sm text-gray-500">
                 Menampilkan {{ $mentor->firstItem() ?? 0 }} - {{ $mentor->lastItem() ?? 0 }} dari {{ $mentor->total() }} data
-                <span class="ml-2 text-green-600">
-                    <i class="fab fa-whatsapp mr-1"></i>
-                    {{ $statistics['with_wa'] }} dengan WhatsApp
-                </span>
-                <span class="ml-2 text-blue-600">
-                    <i class="fas fa-percentage mr-1"></i>
-                    {{ round(($statistics['with_wa'] / max($statistics['total'], 1)) * 100, 1) }}% coverage
-                </span>
             </div>
             <div>
                 {{ $mentor->links() }}
