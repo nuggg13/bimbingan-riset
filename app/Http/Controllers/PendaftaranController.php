@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pendaftaran;
+use App\Models\Jadwal;
+use App\Models\Mentor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PendaftaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pendaftaran::with('peserta')->orderByDesc('created_at');
+        $query = Pendaftaran::with(['peserta', 'jadwal.mentor'])->orderByDesc('created_at');
         
         // Filter berdasarkan status
         if ($request->filled('status') && $request->status !== 'semua') {
@@ -58,30 +61,236 @@ class PendaftaranController extends Controller
         return view('admin.pendaftaran.index', compact('pendaftaran', 'statusOptions', 'statistics'));
     }
 
-    public function updateStatus(Request $request, Pendaftaran $pendaftaran)
+    public function updateStatus(Request $request, $id)
     {
-        $validated = $request->validate([
+        // Validate the request
+        $request->validate([
             'status' => 'required|in:diterima,ditolak,pending,review,konsultasi',
         ]);
 
-        $pendaftaran->status = $validated['status'];
-        $pendaftaran->save();
+        try {
+            // Find the pendaftaran record
+            $pendaftaran = Pendaftaran::where('id_pendaftaran', $id)->first();
+            
+            if (!$pendaftaran) {
+                return response()->json(['error' => 'Data pendaftaran tidak ditemukan.'], 404);
+            }
 
-        // Clear cache setelah update status
-        Cache::forget('pendaftaran_statistics');
+            // Store old status for comparison
+            $oldStatus = $pendaftaran->status;
+            
+            // Jika status diubah menjadi "diterima" dan sebelumnya bukan "diterima"
+            if ($request->status === 'diterima' && $oldStatus !== 'diterima') {
+                // Cek apakah sudah ada jadwal
+                $existingSchedule = Jadwal::where('id_pendaftaran', $pendaftaran->id_pendaftaran)->first();
+                
+                if (!$existingSchedule) {
+                    // Jika belum ada jadwal, return dengan flag untuk menampilkan modal
+                    $mentors = Mentor::orderBy('nama')->get();
+                    return response()->json([
+                        'show_schedule_modal' => true,
+                        'pendaftaran' => $pendaftaran,
+                        'mentors' => $mentors,
+                        'peserta_nama' => $pendaftaran->peserta->nama ?? 'Peserta'
+                    ]);
+                }
+            }
+            
+            // Update the status
+            $pendaftaran->status = $request->status;
+            $pendaftaran->save();
 
-        $statusLabels = [
-            'diterima' => 'Diterima',
-            'ditolak' => 'Ditolak', 
-            'pending' => 'Pending',
-            'review' => 'Review',
-            'konsultasi' => 'Konsultasi'
-        ];
+            // Clear cache
+            Cache::forget('pendaftaran_statistics');
+
+            $statusLabels = [
+                'diterima' => 'Diterima',
+                'ditolak' => 'Ditolak', 
+                'pending' => 'Pending',
+                'review' => 'Review',
+                'konsultasi' => 'Konsultasi'
+            ];
+            
+            $namaPeserta = $pendaftaran->peserta->nama ?? 'Peserta';
+            $statusLabel = $statusLabels[$request->status] ?? $request->status;
+            
+            $successMessage = "Status pendaftaran {$namaPeserta} berhasil diubah dari {$oldStatus} menjadi {$statusLabel}.";
+            
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+                'reload' => true
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Terjadi kesalahan saat mengubah status: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function createSchedule(Request $request, $id)
+    {
+        $request->validate([
+            'id_mentor' => 'required|exists:mentor,id_mentor',
+            'tanggal_mulai' => 'required|date|after_or_equal:today',
+            'tanggal_akhir' => 'required|date|after:tanggal_mulai',
+            'jam_mulai' => 'required|date_format:H:i',
+            'jam_akhir' => 'required|date_format:H:i|after:jam_mulai',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Find the pendaftaran record
+            $pendaftaran = Pendaftaran::where('id_pendaftaran', $id)->first();
+            
+            if (!$pendaftaran) {
+                return response()->json(['error' => 'Data pendaftaran tidak ditemukan.'], 404);
+            }
+
+            // Update status to diterima
+            $pendaftaran->status = 'diterima';
+            $pendaftaran->save();
+
+            // Determine schedule status based on dates
+            $tanggalMulai = \Carbon\Carbon::parse($request->tanggal_mulai);
+            $tanggalAkhir = \Carbon\Carbon::parse($request->tanggal_akhir);
+            $today = \Carbon\Carbon::today();
+            
+            $scheduleStatus = $this->determineScheduleStatus($tanggalMulai, $tanggalAkhir, $today);
+
+            // Create schedule
+            Jadwal::create([
+                'id_pendaftaran' => $pendaftaran->id_pendaftaran,
+                'id_mentor' => $request->id_mentor,
+                'tanggal_mulai' => $request->tanggal_mulai,
+                'tanggal_akhir' => $request->tanggal_akhir,
+                'jam_mulai' => $request->jam_mulai,
+                'jam_akhir' => $request->jam_akhir,
+                'status' => $scheduleStatus
+            ]);
+
+            // Clear cache
+            Cache::forget('pendaftaran_statistics');
+
+            DB::commit();
+
+            $mentor = Mentor::find($request->id_mentor);
+            $namaPeserta = $pendaftaran->peserta->nama ?? 'Peserta';
+            
+            return response()->json([
+                'success' => true,
+                'message' => "Status pendaftaran {$namaPeserta} berhasil diubah menjadi Diterima dan jadwal bimbingan dengan mentor {$mentor->nama} telah dibuat dengan status {$scheduleStatus}."
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json(['error' => 'Terjadi kesalahan saat membuat jadwal: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Determine schedule status based on dates
+     */
+    private function determineScheduleStatus($tanggalMulai, $tanggalAkhir, $today)
+    {
+        // completed: tanggal_akhir sudah kelewat
+        if ($tanggalAkhir->lt($today)) {
+            return 'completed';
+        }
         
-        $namaPeserta = $pendaftaran->peserta->nama ?? 'Peserta';
-        $statusLabel = $statusLabels[$validated['status']] ?? $validated['status'];
+        // ongoing: sudah tanggal_mulai tapi belum tanggal_akhir
+        if ($tanggalMulai->lte($today) && $tanggalAkhir->gte($today)) {
+            return 'ongoing';
+        }
         
-        return redirect()->back()->with('success', "Status pendaftaran {$namaPeserta} berhasil diubah menjadi {$statusLabel}.");
+        // scheduled: tanggal_mulai masih di masa depan
+        if ($tanggalMulai->gt($today)) {
+            return 'scheduled';
+        }
+        
+        // default fallback
+        return 'scheduled';
+    }
+
+    /**
+     * Create schedule for accepted registration
+     */
+    private function createScheduleForAcceptedRegistration($pendaftaran)
+    {
+        // Cek apakah sudah ada jadwal untuk pendaftaran ini
+        $existingSchedule = Jadwal::where('id_pendaftaran', $pendaftaran->id_pendaftaran)->first();
+        
+        if ($existingSchedule) {
+            // Jika sudah ada jadwal, update statusnya berdasarkan tanggal
+            $tanggalMulai = \Carbon\Carbon::parse($existingSchedule->tanggal_mulai);
+            $tanggalAkhir = \Carbon\Carbon::parse($existingSchedule->tanggal_akhir);
+            $today = \Carbon\Carbon::today();
+            
+            $existingSchedule->status = $this->determineScheduleStatus($tanggalMulai, $tanggalAkhir, $today);
+            $existingSchedule->save();
+            return;
+        }
+
+        // Cari mentor yang tersedia berdasarkan keahlian atau random
+        $mentor = $this->findAvailableMentor($pendaftaran);
+        
+        if (!$mentor) {
+            throw new \Exception('Tidak ada mentor yang tersedia saat ini.');
+        }
+
+        // Set tanggal mulai (hari ini + 3 hari kerja)
+        $tanggalMulai = now()->addWeekdays(3);
+        
+        // Set tanggal akhir (1 bulan dari tanggal mulai)
+        $tanggalAkhir = $tanggalMulai->copy()->addMonth();
+        
+        // Set jam default (09:00 - 17:00)
+        $jamMulai = '09:00';
+        $jamAkhir = '17:00';
+
+        // Determine status
+        $scheduleStatus = $this->determineScheduleStatus($tanggalMulai, $tanggalAkhir, \Carbon\Carbon::today());
+
+        // Buat jadwal baru
+        Jadwal::create([
+            'id_pendaftaran' => $pendaftaran->id_pendaftaran,
+            'id_mentor' => $mentor->id_mentor,
+            'tanggal_mulai' => $tanggalMulai->format('Y-m-d'),
+            'tanggal_akhir' => $tanggalAkhir->format('Y-m-d'),
+            'jam_mulai' => $jamMulai,
+            'jam_akhir' => $jamAkhir,
+            'status' => $scheduleStatus
+        ]);
+    }
+
+    /**
+     * Find available mentor for the registration
+     */
+    private function findAvailableMentor($pendaftaran)
+    {
+        // Strategi 1: Cari mentor berdasarkan keahlian yang sesuai dengan minat keilmuan
+        $minatKeilmuan = strtolower($pendaftaran->minat_keilmuan);
+        
+        $mentor = Mentor::where(function($query) use ($minatKeilmuan) {
+            $query->whereRaw('LOWER(keahlian) LIKE ?', ["%{$minatKeilmuan}%"]);
+        })
+        ->whereDoesntHave('jadwal', function($query) {
+            // Cari mentor yang tidak memiliki terlalu banyak jadwal aktif (maksimal 5)
+            $query->whereIn('status', ['ongoing', 'scheduled'])
+                  ->havingRaw('COUNT(*) >= 5');
+        })
+        ->first();
+
+        // Strategi 2: Jika tidak ada mentor yang sesuai, cari mentor dengan beban kerja paling sedikit
+        if (!$mentor) {
+            $mentor = Mentor::withCount(['jadwal' => function($query) {
+                $query->whereIn('status', ['ongoing', 'scheduled']);
+            }])
+            ->orderBy('jadwal_count', 'asc')
+            ->first();
+        }
+
+        return $mentor;
     }
 
     public function export(Request $request)
@@ -154,5 +363,3 @@ class PendaftaranController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 }
-
-

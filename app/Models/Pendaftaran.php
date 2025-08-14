@@ -21,7 +21,6 @@ class Pendaftaran extends Model
         'judul_riset',
         'penjelasan',
         'minat_keilmuan',
-
         'basis_sistem',
         'status',
     ];
@@ -60,5 +59,11 @@ class Pendaftaran extends Model
         ];
 
         return $messages[$this->status] ?? 'Status tidak diketahui.';
+    }
+
+    // Relasi ke Jadwal
+    public function jadwal()
+    {
+        return $this->hasOne(Jadwal::class, 'id_pendaftaran', 'id_pendaftaran');
     }
 }
