@@ -20,13 +20,19 @@ class Pendaftaran extends Model
         'judul_riset',
         'penjelasan',
         'minat_keilmuan',
-        // Kolom "berbasis" tidak pasti penamaannya di DB, jadi tidak dipaksakan di fillable
+        'basis_sistem',
         'status',
     ];
 
     public function peserta()
     {
         return $this->belongsTo(Peserta::class, 'id_peserta', 'id_peserta');
+    }
+
+    // Relasi ke Jadwal
+    public function jadwal()
+    {
+        return $this->hasOne(Jadwal::class, 'id_pendaftaran', 'id_pendaftaran');
     }
 }
 
