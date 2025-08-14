@@ -61,5 +61,10 @@ Route::prefix('admin')->group(function () {
         // Mentor Routes
         Route::resource('mentor', App\Http\Controllers\MentorController::class, ['as' => 'admin']);
         Route::get('/mentor/export', [App\Http\Controllers\MentorController::class, 'export'])->name('admin.mentor.export');
+        
+        // Jadwal Routes
+        Route::resource('jadwal', App\Http\Controllers\JadwalController::class, ['as' => 'admin']);
+        Route::patch('/jadwal/{id}/status', [App\Http\Controllers\JadwalController::class, 'updateStatus'])->name('admin.jadwal.updateStatus');
+        Route::get('/jadwal/export', [App\Http\Controllers\JadwalController::class, 'export'])->name('admin.jadwal.export');
     });
 });
