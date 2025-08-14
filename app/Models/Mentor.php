@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class Mentor extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
     protected $table = 'mentor';
     protected $primaryKey = 'id_mentor';
@@ -37,9 +36,13 @@ class Mentor extends Authenticatable
         return $this->password;
     }
 
-    // Relasi ke Jadwal
-    public function jadwal()
+    public function jadwals()
     {
-        return $this->hasMany(Jadwal::class, 'id_mentor', 'id_mentor');
+        return $this->hasMany(Jadwal::class, 'id_mentor');
+    }
+
+    public function pendaftarans()
+    {
+        return $this->hasManyThrough(Pendaftaran::class, Jadwal::class, 'id_mentor', 'id_pendaftaran', 'id_mentor', 'id_pendaftaran');
     }
 }

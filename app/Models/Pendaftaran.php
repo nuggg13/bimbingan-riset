@@ -35,6 +35,21 @@ class Pendaftaran extends Model
         return $this->belongsTo(Peserta::class, 'id_peserta');
     }
 
+    public function jadwals()
+    {
+        return $this->hasMany(Jadwal::class, 'id_pendaftaran');
+    }
+
+    public function mentor()
+    {
+        return $this->hasOneThrough(Mentor::class, Jadwal::class, 'id_pendaftaran', 'id_mentor', 'id_pendaftaran', 'id_mentor');
+    }
+
+    public function activeJadwal()
+    {
+        return $this->hasOne(Jadwal::class, 'id_pendaftaran')->whereIn('status', ['scheduled', 'ongoing']);
+    }
+
     public function getStatusLabelAttribute()
     {
         $labels = [

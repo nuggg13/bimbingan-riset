@@ -135,7 +135,6 @@ class PendaftaranController extends Controller
             'tanggal_akhir' => 'required|date|after:tanggal_mulai',
             'jam_mulai' => 'required|date_format:H:i',
             'jam_akhir' => 'required|date_format:H:i|after:jam_mulai',
-            'hari' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -167,7 +166,6 @@ class PendaftaranController extends Controller
                 'tanggal_akhir' => $request->tanggal_akhir,
                 'jam_mulai' => $request->jam_mulai,
                 'jam_akhir' => $request->jam_akhir,
-                'hari' => $request->hari,
                 'status' => $scheduleStatus
             ]);
 
