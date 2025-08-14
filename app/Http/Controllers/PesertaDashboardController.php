@@ -24,7 +24,19 @@ class PesertaDashboardController extends Controller
             case 'ditolak':
                 return view('peserta.status', compact('peserta', 'pendaftaran'));
             case 'diterima':
-                return view('peserta.dashboard', compact('peserta', 'pendaftaran'));
+                // Load additional data for accepted participants
+                $jadwals = $pendaftaran->jadwals()->with('mentor')->orderBy('tanggal_mulai', 'desc')->get();
+                $activeJadwal = $pendaftaran->activeJadwal;
+                $mentor = null;
+                
+                // Get mentor from active schedule or latest schedule
+                if ($activeJadwal && $activeJadwal->mentor) {
+                    $mentor = $activeJadwal->mentor;
+                } elseif ($jadwals->isNotEmpty() && $jadwals->first()->mentor) {
+                    $mentor = $jadwals->first()->mentor;
+                }
+                
+                return view('peserta.dashboard', compact('peserta', 'pendaftaran', 'jadwals', 'activeJadwal', 'mentor'));
             default:
                 return view('peserta.status', compact('peserta', 'pendaftaran'));
         }

@@ -68,13 +68,26 @@
                     <h3 class="text-lg font-semibold text-gray-900">Mentor</h3>
                 </div>
                 <div class="text-center">
-                    <div class="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
-                        <i class="fas fa-user text-gray-400 text-xl"></i>
-                    </div>
-                    <p class="text-gray-600 text-sm">Mentor akan segera ditentukan</p>
-                    <button class="mt-3 text-blue-600 hover:text-blue-800 text-sm font-semibold">
-                        Lihat Detail
-                    </button>
+                    @if($mentor)
+                        <div class="w-16 h-16 bg-purple-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-user text-purple-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-semibold text-gray-900">{{ $mentor->nama }}</h4>
+                        <p class="text-gray-600 text-sm mb-2">{{ $mentor->keahlian }}</p>
+                        <p class="text-gray-500 text-xs mb-3">{{ $mentor->email }}</p>
+                        <a href="{{ \App\Helpers\WhatsAppHelper::generateWhatsAppUrl($mentor->nomor_wa, \App\Helpers\WhatsAppHelper::generateMentorContactMessage($peserta->nama, $pendaftaran->judul_riset)) }}" 
+                           target="_blank"
+                           class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition duration-200 inline-block">
+                            <i class="fab fa-whatsapp mr-1"></i>
+                            Hubungi Mentor
+                        </a>
+                    @else
+                        <div class="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-400 text-xl"></i>
+                        </div>
+                        <p class="text-gray-600 text-sm">Mentor akan segera ditentukan</p>
+                        <p class="text-gray-500 text-xs mt-2">Tim kami sedang mencarikan mentor yang sesuai dengan riset Anda</p>
+                    @endif
                 </div>
             </div>
 
@@ -84,13 +97,56 @@
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
                         <i class="fas fa-calendar text-green-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Jadwal</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Jadwal Terbaru</h3>
                 </div>
                 <div class="text-center">
-                    <p class="text-gray-600 text-sm mb-3">Belum ada jadwal bimbingan</p>
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition duration-200">
-                        Atur Jadwal
-                    </button>
+                    @if($activeJadwal)
+                        <div class="bg-{{ $activeJadwal->status_color }}-50 border border-{{ $activeJadwal->status_color }}-200 rounded-lg p-3 mb-3">
+                            <div class="flex items-center justify-center mb-2">
+                                <span class="bg-{{ $activeJadwal->status_color }}-100 text-{{ $activeJadwal->status_color }}-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                    {{ $activeJadwal->status_label }}
+                                </span>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-900">{{ $activeJadwal->formatted_date_time }}</p>
+                            @if($activeJadwal->mentor)
+                                <p class="text-xs text-gray-600 mt-1">dengan {{ $activeJadwal->mentor->nama }}</p>
+                            @endif
+                        </div>
+                        @if($activeJadwal->mentor)
+                            <a href="{{ \App\Helpers\WhatsAppHelper::generateWhatsAppUrl($activeJadwal->mentor->nomor_wa, \App\Helpers\WhatsAppHelper::generateScheduleDiscussionMessage($peserta->nama, $pendaftaran->judul_riset, $activeJadwal->schedule_description)) }}" 
+                               target="_blank"
+                               class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition duration-200 inline-block">
+                                <i class="fab fa-whatsapp mr-1"></i>
+                                Diskusi Jadwal
+                            </a>
+                        @else
+                            <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition duration-200">
+                                <i class="fas fa-eye mr-1"></i>
+                                Lihat Detail
+                            </button>
+                        @endif
+                    @elseif($jadwals->isNotEmpty())
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+                            <p class="text-sm font-semibold text-gray-900">Jadwal Terakhir:</p>
+                            <p class="text-sm text-gray-600">{{ $jadwals->first()->formatted_date_time }}</p>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                {{ $jadwals->first()->status_label }}
+                            </span>
+                        </div>
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition duration-200">
+                            <i class="fas fa-calendar-plus mr-1"></i>
+                            Jadwalkan Bimbingan
+                        </button>
+                    @else
+                        <div class="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+                            <i class="fas fa-calendar-plus text-gray-400 text-xl"></i>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3">Belum ada jadwal bimbingan</p>
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition duration-200">
+                            <i class="fas fa-calendar-plus mr-1"></i>
+                            Atur Jadwal
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -127,6 +183,51 @@
                     </div>
                 </div>
 
+                <!-- Schedule History -->
+                @if($jadwals->isNotEmpty())
+                <div class="bg-white shadow-xl rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Riwayat Jadwal Bimbingan</h3>
+                    <div class="space-y-4">
+                        @foreach($jadwals->take(5) as $jadwal)
+                        <div class="flex items-start border-l-4 border-{{ $jadwal->status_color }}-400 pl-4 py-2">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <p class="font-semibold text-gray-900">
+                                        @if($jadwal->hari)
+                                            {{ $jadwal->schedule_description }}
+                                        @else
+                                            {{ $jadwal->formatted_date_time }}
+                                        @endif
+                                    </p>
+                                    <span class="bg-{{ $jadwal->status_color }}-100 text-{{ $jadwal->status_color }}-800 px-2 py-1 rounded-full text-xs font-semibold">
+                                        {{ $jadwal->status_label }}
+                                    </span>
+                                </div>
+                                @if($jadwal->hari)
+                                    <p class="text-gray-500 text-xs mb-1">
+                                        <i class="fas fa-calendar-week mr-1"></i>
+                                        Jadwal Rutin: {{ $jadwal->formatted_hari }}
+                                    </p>
+                                @endif
+                                @if($jadwal->mentor)
+                                    <p class="text-gray-600 text-sm">Mentor: {{ $jadwal->mentor->nama }}</p>
+                                    <p class="text-gray-500 text-xs">{{ $jadwal->mentor->keahlian }}</p>
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
+                        
+                        @if($jadwals->count() > 5)
+                        <div class="text-center pt-4">
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                                Lihat Semua Jadwal ({{ $jadwals->count() }})
+                            </button>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 <!-- Research Progress -->
                 <div class="bg-white shadow-xl rounded-2xl p-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-6">Progress Riset</h3>
@@ -141,18 +242,34 @@
                         
                         <div class="flex items-center justify-between">
                             <span class="text-gray-700">Penentuan Mentor</span>
-                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Proses</span>
+                            @if($mentor)
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Selesai</span>
+                            @else
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">Proses</span>
+                            @endif
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div>
+                            <div class="bg-{{ $mentor ? 'green' : 'yellow' }}-500 h-2 rounded-full" style="width: {{ $mentor ? '100' : '50' }}%"></div>
                         </div>
                         
                         <div class="flex items-center justify-between">
                             <span class="text-gray-700">Bimbingan</span>
-                            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Menunggu</span>
+                            @if($activeJadwal)
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">Aktif</span>
+                            @elseif($jadwals->isNotEmpty())
+                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Tersedia</span>
+                            @else
+                                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Menunggu</span>
+                            @endif
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                            @if($activeJadwal)
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
+                            @elseif($jadwals->isNotEmpty())
+                                <div class="bg-gray-400 h-2 rounded-full" style="width: 25%"></div>
+                            @else
+                                <div class="bg-gray-400 h-2 rounded-full" style="width: 0%"></div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -193,14 +310,29 @@
                 <div class="bg-white shadow-xl rounded-2xl p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Aksi Cepat</h3>
                     <div class="space-y-3">
-                        <button class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200 flex items-center justify-center">
-                            <i class="fas fa-comments mr-2"></i>
-                            Hubungi Mentor
-                        </button>
-                        <button class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center">
-                            <i class="fas fa-calendar-plus mr-2"></i>
-                            Jadwalkan Bimbingan
-                        </button>
+                        @if($mentor)
+                            <a href="{{ \App\Helpers\WhatsAppHelper::generateWhatsAppUrl($mentor->nomor_wa, \App\Helpers\WhatsAppHelper::generateMentorContactMessage($peserta->nama, $pendaftaran->judul_riset)) }}" 
+                               target="_blank"
+                               class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200 flex items-center justify-center">
+                                <i class="fab fa-whatsapp mr-2"></i>
+                                Hubungi Mentor
+                            </a>
+                            <a href="{{ \App\Helpers\WhatsAppHelper::generateWhatsAppUrl($mentor->nomor_wa, \App\Helpers\WhatsAppHelper::generateScheduleDiscussionMessage($peserta->nama, $pendaftaran->judul_riset, $activeJadwal ? $activeJadwal->schedule_description : null)) }}" 
+                               target="_blank"
+                               class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200 flex items-center justify-center">
+                                <i class="fab fa-whatsapp mr-2"></i>
+                                Diskusi Jadwal
+                            </a>
+                        @else
+                            <button class="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center" disabled>
+                                <i class="fas fa-user-times mr-2"></i>
+                                Mentor Belum Ditentukan
+                            </button>
+                            <button class="w-full bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center" disabled>
+                                <i class="fas fa-calendar-times mr-2"></i>
+                                Jadwal Belum Tersedia
+                            </button>
+                        @endif
                         <button class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
                             <i class="fas fa-file-upload mr-2"></i>
                             Upload Dokumen

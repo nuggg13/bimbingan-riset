@@ -21,7 +21,7 @@ class RegistrationController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|email|unique:peserta,email',
             'password' => 'required|min:8|confirmed',
-            'nomor_wa' => 'required|string|max:20',
+            'nomor_wa' => 'required|string|regex:/^\+62[0-9]{9,13}$/',
             'instansi' => 'required|string|max:255',
             'fakultas' => 'required|string|max:255'
         ], [
@@ -33,6 +33,7 @@ class RegistrationController extends Controller
             'password.min' => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'nomor_wa.required' => 'Nomor WhatsApp wajib diisi.',
+            'nomor_wa.regex' => 'Format nomor WhatsApp harus dimulai dengan +62 dan diikuti 9-13 digit angka.',
             'instansi.required' => 'Instansi wajib diisi.',
             'fakultas.required' => 'Fakultas wajib diisi.'
         ]);
@@ -93,6 +94,17 @@ class RegistrationController extends Controller
 
         $step1Data = session('registration_step1');
 
+        // Handle custom fields
+        $minatKeilmuan = $request->minat_keilmuan;
+        if ($minatKeilmuan === 'Lainnya' && $request->custom_minat_keilmuan) {
+            $minatKeilmuan = $request->custom_minat_keilmuan;
+        }
+
+        $basisSistem = $request->basis_sistem;
+        if ($basisSistem === 'Lainnya' && $request->custom_basis_sistem) {
+            $basisSistem = $request->custom_basis_sistem;
+        }
+
         try {
             // Create peserta
             $peserta = Peserta::create([
@@ -109,8 +121,8 @@ class RegistrationController extends Controller
                 'id_peserta' => $peserta->id_peserta,
                 'judul_riset' => $request->judul_riset,
                 'penjelasan' => $request->penjelasan,
-                'minat_keilmuan' => $request->minat_keilmuan,
-                'basis_sistem' => $request->basis_sistem,
+                'minat_keilmuan' => $minatKeilmuan,
+                'basis_sistem' => $basisSistem,
                 'status' => 'pending'
             ]);
 

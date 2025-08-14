@@ -72,7 +72,8 @@
                     <i class="fas fa-brain text-gray-400 mr-2"></i>Minat Keilmuan
                 </label>
                 <select id="minat_keilmuan" name="minat_keilmuan" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    onchange="toggleCustomField('minat_keilmuan', 'custom_minat_keilmuan')">
                     <option value="">Pilih minat keilmuan</option>
                     <option value="Artificial Intelligence" {{ old('minat_keilmuan') == 'Artificial Intelligence' ? 'selected' : '' }}>Artificial Intelligence</option>
                     <option value="Machine Learning" {{ old('minat_keilmuan') == 'Machine Learning' ? 'selected' : '' }}>Machine Learning</option>
@@ -86,6 +87,13 @@
                     <option value="Natural Language Processing" {{ old('minat_keilmuan') == 'Natural Language Processing' ? 'selected' : '' }}>Natural Language Processing</option>
                     <option value="Lainnya" {{ old('minat_keilmuan') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                 </select>
+                
+                <!-- Custom Minat Keilmuan Field -->
+                <div id="custom_minat_keilmuan" class="mt-3 {{ old('minat_keilmuan') == 'Lainnya' ? '' : 'hidden' }}">
+                    <input type="text" name="custom_minat_keilmuan" value="{{ old('custom_minat_keilmuan') }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        placeholder="Sebutkan minat keilmuan Anda">
+                </div>
             </div>
 
             <!-- Basis Sistem -->
@@ -94,7 +102,8 @@
                     <i class="fas fa-cogs text-gray-400 mr-2"></i>Basis Sistem
                 </label>
                 <select id="basis_sistem" name="basis_sistem" required
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    onchange="toggleCustomField('basis_sistem', 'custom_basis_sistem')">
                     <option value="">Pilih basis sistem</option>
                     <option value="Web Application" {{ old('basis_sistem') == 'Web Application' ? 'selected' : '' }}>Web Application</option>
                     <option value="Mobile Application" {{ old('basis_sistem') == 'Mobile Application' ? 'selected' : '' }}>Mobile Application</option>
@@ -106,6 +115,13 @@
                     <option value="Cloud Computing" {{ old('basis_sistem') == 'Cloud Computing' ? 'selected' : '' }}>Cloud Computing</option>
                     <option value="Lainnya" {{ old('basis_sistem') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                 </select>
+                
+                <!-- Custom Basis Sistem Field -->
+                <div id="custom_basis_sistem" class="mt-3 {{ old('basis_sistem') == 'Lainnya' ? '' : 'hidden' }}">
+                    <input type="text" name="custom_basis_sistem" value="{{ old('custom_basis_sistem') }}"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                        placeholder="Sebutkan basis sistem Anda">
+                </div>
             </div>
         </div>
 
@@ -125,4 +141,27 @@
         </div>
     </form>
 </div>
+
+<script>
+function toggleCustomField(selectId, customFieldId) {
+    const select = document.getElementById(selectId);
+    const customField = document.getElementById(customFieldId);
+    const customInput = customField.querySelector('input');
+    
+    if (select.value === 'Lainnya') {
+        customField.classList.remove('hidden');
+        customInput.required = true;
+    } else {
+        customField.classList.add('hidden');
+        customInput.required = false;
+        customInput.value = '';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleCustomField('minat_keilmuan', 'custom_minat_keilmuan');
+    toggleCustomField('basis_sistem', 'custom_basis_sistem');
+});
+</script>
 @endsection
