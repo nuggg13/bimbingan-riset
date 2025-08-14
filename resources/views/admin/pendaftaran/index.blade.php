@@ -595,7 +595,7 @@
 <div id="schedule-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300"></div>
     <div class="flex min-h-screen items-center justify-center p-4">
-        <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
+        <div class="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
             <!-- Header -->
             <div class="bg-gradient-to-r from-green-600 to-emerald-700 px-8 py-6 text-white">
                 <div class="flex items-center justify-between">
@@ -663,6 +663,70 @@
                         </label>
                         <input type="time" name="jam_akhir" id="jam_akhir" value="17:00" required
                                class="w-full border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                    </div>
+                </div>
+
+                <!-- Days Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                        Hari Bimbingan (Opsional)
+                    </label>
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-500 mb-3">Pilih hari-hari dalam seminggu untuk jadwal rutin bimbingan:</p>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 lg:gap-2">
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="senin" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Senin</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="selasa" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Selasa</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="rabu" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Rabu</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="kamis" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Kamis</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="jumat" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Jumat</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="sabtu" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Sabtu</span>
+                            </label>
+                            <label class="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                                <input type="checkbox" name="days[]" value="minggu" 
+                                       class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Minggu</span>
+                            </label>
+                        </div>
+                        
+                        <input type="hidden" name="hari" id="hari" value="">
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-600 mt-0.5 mr-3"></i>
+                                <div class="text-sm text-blue-800">
+                                    <p class="font-medium mb-1">Informasi Hari Bimbingan:</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Jika tidak ada hari yang dipilih, jadwal akan bersifat satu kali (berdasarkan tanggal mulai dan akhir)</li>
+                                        <li>Jika ada hari yang dipilih, jadwal akan berulang setiap minggu pada hari-hari tersebut</li>
+                                        <li>Contoh: Pilih "Senin" dan "Rabu" untuk jadwal rutin setiap Senin dan Rabu</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -769,6 +833,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 tanggalAkhirInput.min = this.value;
             }
         });
+    }
+
+    // Handle days selection in schedule modal
+    const dayCheckboxes = document.querySelectorAll('input[name="days[]"]');
+    const hariInput = document.getElementById('hari');
+    
+    dayCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const selectedDays = Array.from(dayCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            if (hariInput) {
+                hariInput.value = selectedDays.join(',');
+            }
+        });
+    });
+    
+    // Initialize hari input on page load
+    if (dayCheckboxes.length > 0 && hariInput) {
+        const selectedDays = Array.from(dayCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        hariInput.value = selectedDays.join(',');
     }
 });
 
@@ -920,6 +1008,18 @@ function resetScheduleForm() {
         // Reset default values
         document.getElementById('jam_mulai').value = '09:00';
         document.getElementById('jam_akhir').value = '17:00';
+        
+        // Reset day checkboxes
+        const dayCheckboxes = document.querySelectorAll('input[name="days[]"]');
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Reset hidden hari input
+        const hariInput = document.getElementById('hari');
+        if (hariInput) {
+            hariInput.value = '';
+        }
     }
     currentPendaftaranId = null;
 }

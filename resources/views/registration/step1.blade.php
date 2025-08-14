@@ -81,9 +81,16 @@
             <label for="nomor_wa" class="block text-sm font-medium text-gray-700 mb-2">
                 <i class="fab fa-whatsapp text-gray-400 mr-2"></i>Nomor WhatsApp
             </label>
-            <input type="text" id="nomor_wa" name="nomor_wa" value="{{ old('nomor_wa') }}" required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                placeholder="08xxxxxxxxxx">
+            <div class="relative">
+                <input type="text" id="nomor_wa" name="nomor_wa" value="{{ old('nomor_wa') }}" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                    placeholder="+628xxxxxxxxxx"
+                    pattern="^\+62[0-9]{9,13}$">
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <i class="fas fa-info-circle text-gray-400" title="Format: +62 diikuti 9-13 digit angka"></i>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Format: +62 diikuti dengan nomor tanpa angka 0 di depan (contoh: +628123456789)</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
