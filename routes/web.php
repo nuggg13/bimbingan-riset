@@ -68,5 +68,34 @@ Route::prefix('admin')->group(function () {
         Route::resource('jadwal', App\Http\Controllers\JadwalController::class, ['as' => 'admin']);
         Route::patch('/jadwal/{id}/status', [App\Http\Controllers\JadwalController::class, 'updateStatus'])->name('admin.jadwal.updateStatus');
         Route::get('/jadwal/export', [App\Http\Controllers\JadwalController::class, 'export'])->name('admin.jadwal.export');
+        
+        // Catatan Bimbingan Routes
+        Route::resource('catatan-bimbingan', App\Http\Controllers\CatatanBimbinganController::class, ['as' => 'admin']);
+        Route::get('/catatan-bimbingan/export', [App\Http\Controllers\CatatanBimbinganController::class, 'export'])->name('admin.catatan-bimbingan.export');
+        Route::post('/catatan-bimbingan/{id}/progress', [App\Http\Controllers\CatatanBimbinganController::class, 'addProgress'])->name('admin.catatan-bimbingan.addProgress');
+        Route::put('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\CatatanBimbinganController::class, 'updateProgress'])->name('admin.catatan-bimbingan.updateProgress');
+        Route::delete('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\CatatanBimbinganController::class, 'deleteProgress'])->name('admin.catatan-bimbingan.deleteProgress');
+    });
+});
+
+// Mentor Routes
+Route::prefix('mentor')->group(function () {
+    Route::get('/login', [App\Http\Controllers\MentorAuthController::class, 'showLoginForm'])->name('mentor.login');
+    Route::post('/login', [App\Http\Controllers\MentorAuthController::class, 'login'])->name('mentor.login.process');
+    Route::post('/logout', [App\Http\Controllers\MentorAuthController::class, 'logout'])->name('mentor.logout');
+    
+    // Protected mentor routes
+    Route::middleware('mentor')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\MentorDashboardController::class, 'dashboard'])->name('mentor.dashboard');
+        Route::get('/participants', [App\Http\Controllers\MentorDashboardController::class, 'participants'])->name('mentor.participants');
+        Route::get('/participants/{id}', [App\Http\Controllers\MentorDashboardController::class, 'participantDetail'])->name('mentor.participants.detail');
+        Route::get('/schedules', [App\Http\Controllers\MentorDashboardController::class, 'schedules'])->name('mentor.schedules');
+        
+        // Catatan Bimbingan Routes for Mentor
+        Route::resource('catatan-bimbingan', App\Http\Controllers\MentorCatatanBimbinganController::class, ['as' => 'mentor']);
+        Route::get('/catatan-bimbingan/export', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'export'])->name('mentor.catatan-bimbingan.export');
+        Route::post('/catatan-bimbingan/{id}/progress', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'addProgress'])->name('mentor.catatan-bimbingan.addProgress');
+        Route::put('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'updateProgress'])->name('mentor.catatan-bimbingan.updateProgress');
+        Route::delete('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'deleteProgress'])->name('mentor.catatan-bimbingan.deleteProgress');
     });
 });

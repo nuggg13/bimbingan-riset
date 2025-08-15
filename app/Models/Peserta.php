@@ -41,4 +41,14 @@ class Peserta extends Authenticatable
     {
         return $this->hasOne(Pendaftaran::class, 'id_peserta');
     }
+
+    public function catatanBimbingan()
+    {
+        return $this->hasMany(CatatanBimbingan::class, 'id_peserta');
+    }
+
+    public function getLatestCatatanAttribute()
+    {
+        return $this->catatanBimbingan()->latest('tanggal_bimbingan')->first();
+    }
 }

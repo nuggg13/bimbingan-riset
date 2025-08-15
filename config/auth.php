@@ -48,6 +48,10 @@ return [
             'driver' => 'session',
             'provider' => 'pesertas',
         ],
+        'mentor' => [
+            'driver' => 'session',
+            'provider' => 'mentors',
+        ],
     ],
 
     /*
@@ -79,6 +83,10 @@ return [
         'pesertas' => [
             'driver' => 'eloquent',
             'model' => App\Models\Peserta::class,
+        ],
+        'mentors' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Mentor::class,
         ],
 
         // 'users' => [

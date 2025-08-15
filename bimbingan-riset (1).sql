@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 14, 2025 at 06:33 AM
+-- Generation Time: Aug 15, 2025 at 11:09 PM
 -- Server version: 8.0.30
--- PHP Version: 8.3.6
+-- PHP Version: 8.1.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -48,16 +48,34 @@ INSERT INTO `admin` (`id_admin`, `nama`, `email`, `password`, `nomor_wa`, `creat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `catatan_bimbingan`
+--
+
+CREATE TABLE `catatan_bimbingan` (
+  `id_catatan` int NOT NULL,
+  `id_peserta` int NOT NULL,
+  `tanggal_bimbingan` date NOT NULL,
+  `hasil_bimbingan` text NOT NULL,
+  `tugas_perbaikan` text NOT NULL,
+  `catatan_tambahan` text NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL,
+  `updated_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `failed_jobs`
 --
 
 CREATE TABLE `failed_jobs` (
   `id` bigint UNSIGNED NOT NULL,
-  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -86,11 +104,7 @@ CREATE TABLE `jadwal` (
 --
 
 INSERT INTO `jadwal` (`id_jadwal`, `id_pendaftaran`, `id_mentor`, `tanggal_mulai`, `tanggal_akhir`, `jam_mulai`, `jam_akhir`, `hari`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 1, '2025-08-17', '2025-09-27', '12:09:00', '15:12:00', NULL, 'scheduled', '2025-08-14 04:27:23', '2025-08-14 05:09:59'),
-(2, 1, 1, '2025-08-14', '2025-09-30', '09:00:00', '17:00:00', NULL, 'ongoing', '2025-08-14 05:52:35', '2025-08-14 05:52:35'),
-(3, 6, 1, '2025-08-17', '2025-09-30', '10:01:00', '18:01:00', NULL, 'scheduled', '2025-08-14 06:00:36', '2025-08-14 06:00:36'),
-(4, 5, 1, '2025-08-17', '2025-09-27', '09:00:00', '17:00:00', NULL, 'scheduled', '2025-08-14 06:02:52', '2025-08-14 06:02:52'),
-(5, 4, 1, '2025-08-17', '2025-10-01', '09:00:00', '17:00:00', NULL, 'scheduled', '2025-08-14 06:03:13', '2025-08-14 06:03:13');
+(6, 7, 1, '2025-08-15', '2025-10-18', '09:00:00', '15:00:00', 'senin,rabu,sabtu', 'scheduled', '2025-08-15 01:29:15', '2025-08-15 01:30:12');
 
 -- --------------------------------------------------------
 
@@ -124,7 +138,7 @@ INSERT INTO `mentor` (`id_mentor`, `nama`, `email`, `password`, `nomor_wa`, `kea
 
 CREATE TABLE `migrations` (
   `id` int UNSIGNED NOT NULL,
-  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `migration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -146,8 +160,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 --
 
 CREATE TABLE `password_reset_tokens` (
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -161,7 +175,7 @@ CREATE TABLE `pendaftaran` (
   `id_pendaftaran` int NOT NULL,
   `id_peserta` int NOT NULL,
   `judul_riset` varchar(255) NOT NULL,
-  `penjelasan` varchar(255) NOT NULL,
+  `penjelasan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `minat_keilmuan` varchar(255) NOT NULL,
   `basis_sistem` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `status` enum('diterima','ditolak','pending','review','konsultasi') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -174,12 +188,7 @@ CREATE TABLE `pendaftaran` (
 --
 
 INSERT INTO `pendaftaran` (`id_pendaftaran`, `id_peserta`, `judul_riset`, `penjelasan`, `minat_keilmuan`, `basis_sistem`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'cara memahami suara melalui web', 'tanpa mic', 'sistematik', 'aplikasi', 'diterima', '2025-08-12 06:41:30', '2025-08-14 05:52:35'),
-(2, 2, 'Femboy disekitar kita', 'kadang kita tidak sadar keluarga teman atau bos dikantor kita adalah femboy', 'Artificial Intelligence', 'Web Application', 'diterima', '2025-08-13 03:50:13', '2025-08-14 04:51:03'),
-(3, 3, 'cara menghitung peluang mendapatkan teteh sunda gothic', 'Mannnnnnntaaaaaaaappppppppp', 'Data Science', 'IoT System', 'pending', '2025-08-13 04:30:19', '2025-08-13 04:30:19'),
-(4, 4, 'adawdsa', 'dawdas', 'Natural Language Processing', 'Mobile Application', 'diterima', '2025-08-13 05:01:18', '2025-08-14 06:03:13'),
-(5, 5, 'dasdasdasd', 'adasdasd', 'balsdad', 'dadsada', 'diterima', '2025-08-14 04:34:04', '2025-08-14 06:02:52'),
-(6, 6, 'sesuatu yang berlebihan bikin kita merasa puas', 'aku suka berlebihan', 'Psikologi', 'Utilty', 'diterima', '2025-08-14 05:59:39', '2025-08-14 06:00:36');
+(7, 7, 'Sistem Transparansi dan Monitoring Anggaran Daerah Berbasis Web', 'Penelitian ini bertujuan mengembangkan sistem berbasis web untuk mempublikasikan data anggaran pemerintah daerah secara real-time dan mudah diakses masyarakat. Sistem ini akan menampilkan informasi alokasi, penggunaan, dan progres realisasi anggaran dalam bentuk tabel interaktif dan visualisasi grafik. Manfaatnya adalah meningkatkan transparansi, mencegah potensi penyalahgunaan dana, serta memperkuat kepercayaan publik terhadap pengelolaan keuangan daerah.', 'Web Development', 'Web Application', 'diterima', '2025-08-15 01:25:02', '2025-08-15 01:29:15');
 
 -- --------------------------------------------------------
 
@@ -189,11 +198,11 @@ INSERT INTO `pendaftaran` (`id_pendaftaran`, `id_peserta`, `judul_riset`, `penje
 
 CREATE TABLE `personal_access_tokens` (
   `id` bigint UNSIGNED NOT NULL,
-  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `tokenable_id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text COLLATE utf8mb4_unicode_ci,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -223,12 +232,22 @@ CREATE TABLE `peserta` (
 --
 
 INSERT INTO `peserta` (`id_peserta`, `nama`, `email`, `password`, `nomor_wa`, `instansi`, `fakultas`, `created_at`, `updated_at`) VALUES
-(1, 'nugraha', 'nugrahaabisantana@gmail.com', '$2y$10$MRRUfg2ajP.hDyA2sxYOheBx/iyN.DUcx.2SSigt1aadDcrY55ZZm', '0895320904623', 'universitas indonesia', 'Fakultas Ilmu Komputer', '2025-08-12 06:39:40', '2025-08-12 06:39:40'),
-(2, 'M.Apriansyah', 'lnata2341@gmail.com', '$2y$12$Zdxd6FSdrxboJYe/nPwcl.3BOfWjKfk7uxI1wljPAU3m.k2VC2jKm', '+62897654321', 'Universitas Indonesia', 'Ilmu sosial', '2025-08-13 03:50:13', '2025-08-13 03:50:13'),
-(3, 'nugraha', 'nugra@gmail.com', '$2y$12$uhBVxVx6cPAd1kKr.10tIeM7uVD3OY8FW7J1V.Gd1wA5xn0rBy9iy', '+62891234567', 'Institut Teknologi Bandung', 'FSRD', '2025-08-13 04:30:19', '2025-08-13 04:30:19'),
-(4, 'nugraha', 'nuggra@gmail.com', '$2y$12$GA/YoZ1wWDLcGcg88mbmsuhSQnPJ1CQvS.a.CbU8d2beItJ5cCbaa', '+62891234567', 'Institut Teknologi Bandung', 'FSRD', '2025-08-13 05:01:18', '2025-08-13 05:01:18'),
-(5, 'nugraha', 'lnata23411@gmail.com', '$2y$12$fq2ufyMVtna2AS.d5IAMcu.DJ1M3PKRvN8JgTwzYX5d19viBffrPy', '+62891234567', 'Institut Teknologi Bandung', 'FSRD', '2025-08-14 04:34:04', '2025-08-14 04:34:04'),
-(6, 'Ichigo', 'ichi@gmail.com', '$2y$12$L.14DuWhHnYtitlb5XO/S.jkC103r2f7McxoQvp4lE.qwm76MGrGa', '+62895618270001', 'Institut Teknologi Bandung', 'FSRD', '2025-08-14 05:59:39', '2025-08-14 05:59:39');
+(7, 'Nugraha abi Santana', 'nugrahaabisantana@gmail.com', '$2y$12$lDva4hsAL0Ayk9ByBkfzYOQml168SAYh0sthVrmRF5pqYh8tJp2Fm', '+62895320904658', 'Universitas Indonesia', 'Fakultas ilmu komputer', '2025-08-15 01:25:02', '2025-08-15 01:38:05');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `update_progress`
+--
+
+CREATE TABLE `update_progress` (
+  `id_progress` int NOT NULL,
+  `id_catatan` int NOT NULL,
+  `tanggal_update` date NOT NULL,
+  `deskripsi_progress` text NOT NULL,
+  `persentase` decimal(5,2) NOT NULL,
+  `created_at` timestamp NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -238,11 +257,11 @@ INSERT INTO `peserta` (`id_peserta`, `nama`, `email`, `password`, `nomor_wa`, `i
 
 CREATE TABLE `users` (
   `id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -256,6 +275,12 @@ CREATE TABLE `users` (
 --
 ALTER TABLE `admin`
   ADD PRIMARY KEY (`id_admin`);
+
+--
+-- Indexes for table `catatan_bimbingan`
+--
+ALTER TABLE `catatan_bimbingan`
+  ADD PRIMARY KEY (`id_catatan`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -311,6 +336,12 @@ ALTER TABLE `peserta`
   ADD PRIMARY KEY (`id_peserta`);
 
 --
+-- Indexes for table `update_progress`
+--
+ALTER TABLE `update_progress`
+  ADD PRIMARY KEY (`id_progress`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -328,6 +359,12 @@ ALTER TABLE `admin`
   MODIFY `id_admin` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `catatan_bimbingan`
+--
+ALTER TABLE `catatan_bimbingan`
+  MODIFY `id_catatan` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `failed_jobs`
 --
 ALTER TABLE `failed_jobs`
@@ -337,7 +374,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `jadwal`
 --
 ALTER TABLE `jadwal`
-  MODIFY `id_jadwal` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_jadwal` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `mentor`
@@ -355,7 +392,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `pendaftaran`
 --
 ALTER TABLE `pendaftaran`
-  MODIFY `id_pendaftaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_pendaftaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -367,7 +404,13 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `peserta`
 --
 ALTER TABLE `peserta`
-  MODIFY `id_peserta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_peserta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `update_progress`
+--
+ALTER TABLE `update_progress`
+  MODIFY `id_progress` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
