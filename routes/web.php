@@ -41,6 +41,8 @@ Route::prefix('peserta')->group(function () {
     // Protected peserta routes
     Route::middleware('peserta')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\PesertaDashboardController::class, 'dashboard'])->name('peserta.dashboard');
+        Route::get('/profile/edit', [App\Http\Controllers\PesertaDashboardController::class, 'editProfile'])->name('peserta.profile.edit');
+        Route::put('/profile/update', [App\Http\Controllers\PesertaDashboardController::class, 'updateProfile'])->name('peserta.profile.update');
     });
 });
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class PesertaDashboardController extends Controller
 {
@@ -40,5 +42,57 @@ class PesertaDashboardController extends Controller
             default:
                 return view('peserta.status', compact('peserta', 'pendaftaran'));
         }
+    }
+
+    public function editProfile()
+    {
+        $peserta = Auth::guard('peserta')->user();
+        return view('peserta.edit-profile', compact('peserta'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $peserta = Auth::guard('peserta')->user();
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('peserta', 'email')->ignore($peserta->id_peserta, 'id_peserta')
+            ],
+            'nomor_wa' => 'required|string|max:20',
+            'instansi' => 'required|string|max:255',
+            'fakultas' => 'required|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+        ], [
+            'nama.required' => 'Nama wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah digunakan oleh peserta lain.',
+            'nomor_wa.required' => 'Nomor WhatsApp wajib diisi.',
+            'instansi.required' => 'Instansi wajib diisi.',
+            'fakultas.required' => 'Fakultas wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $updateData = [
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'nomor_wa' => $request->nomor_wa,
+            'instansi' => $request->instansi,
+            'fakultas' => $request->fakultas,
+        ];
+
+        // Only update password if provided
+        if ($request->filled('password')) {
+            $updateData['password'] = Hash::make($request->password);
+        }
+
+        $peserta->update($updateData);
+
+        return redirect()->route('peserta.dashboard')->with('success', 'Profil berhasil diperbarui!');
     }
 }

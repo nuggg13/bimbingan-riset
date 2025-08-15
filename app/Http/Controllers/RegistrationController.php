@@ -76,7 +76,7 @@ class RegistrationController extends Controller
 
         $validator = Validator::make($request->all(), [
             'judul_riset' => 'required|string|max:255',
-            'penjelasan' => 'required|string|max:255',
+            'penjelasan' => 'required|string',
             'minat_keilmuan' => 'required|string|max:255',
             'basis_sistem' => 'required|string|max:255'
         ], [

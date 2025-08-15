@@ -23,6 +23,16 @@
     </div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Success Message -->
+        @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-6">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                {{ session('success') }}
+            </div>
+        </div>
+        @endif
+
         <!-- Welcome Message -->
         <div class="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-2xl p-6 mb-8">
             <div class="flex items-center">
@@ -301,9 +311,10 @@
                             <span class="font-semibold">{{ $peserta->nomor_wa }}</span>
                         </div>
                     </div>
-                    <button class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition duration-200">
+                    <a href="{{ route('peserta.profile.edit') }}" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-edit mr-2"></i>
                         Edit Profil
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Quick Actions -->
