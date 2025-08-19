@@ -111,13 +111,12 @@
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-flag mr-2"></i>Status
                 </label>
-                <select name="status" id="status" 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('status') border-red-500 @enderror">
-                    <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                    <option value="published" {{ old('status', 'published') == 'published' ? 'selected' : '' }}>Dipublikasi</option>
-                    <option value="reviewed" {{ old('status') == 'reviewed' ? 'selected' : '' }}>Direview</option>
-                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
-                </select>
+                <input type="text" 
+                       name="status" 
+                       id="status" 
+                       value="{{ old('status', 'published') }}"
+                       placeholder="Masukkan status bimbingan..."
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 @error('status') border-red-500 @enderror">
                 @error('status')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror

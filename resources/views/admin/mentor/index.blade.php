@@ -6,7 +6,7 @@
 <!-- Loading Overlay -->
 <div id="initial-loading" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50 transition-opacity duration-300">
     <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
         <p class="text-gray-600">Memuat data mentor...</p>
     </div>
 </div>
@@ -18,7 +18,7 @@
             <p class="text-gray-600">Kelola data mentor untuk bimbingan riset.</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <div class="text-sm bg-blue-50 text-blue-700 px-4 py-2 rounded-lg inline-flex items-center">
+            <div class="text-sm bg-purple-50 text-purple-700 px-4 py-2 rounded-lg inline-flex items-center">
                 <i class="fas fa-users mr-2"></i>
                 Total: {{ $statistics['total'] }} mentor
             </div>
@@ -69,7 +69,7 @@
 <div class="bg-white shadow rounded-lg mb-6">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-medium text-gray-900 flex items-center">
-            <i class="fas fa-filter mr-2 text-blue-600"></i>
+            <i class="fas fa-filter mr-2 text-purple-600"></i>
             Filter & Pencarian
         </h3>
     </div>
@@ -79,10 +79,10 @@
                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Cari Mentor</label>
                 <input type="text" name="search" id="search" value="{{ request('search') }}" 
                        placeholder="Cari berdasarkan nama, email, atau keahlian..." 
-                       class="w-full border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                       class="w-full border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-sm">
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center">
                     <i class="fas fa-search mr-2"></i>
                     Cari
                 </button>
@@ -102,7 +102,7 @@
 <!-- Action Buttons -->
 <div class="mb-6 flex justify-between items-center">
     <div class="flex items-center space-x-4">
-        <a href="{{ route('admin.mentor.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+        <a href="{{ route('admin.mentor.create') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
             <i class="fas fa-plus mr-2"></i>
             Tambah Mentor
         </a>

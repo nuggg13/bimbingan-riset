@@ -20,6 +20,18 @@ class MentorDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Get today's schedules
+        $today = now()->format('Y-m-d');
+        $todaySchedules = Jadwal::with(['pendaftaran.peserta'])
+            ->where('id_mentor', $mentor->id_mentor)
+            ->where(function($query) use ($today) {
+                $query->whereDate('tanggal_mulai', '<=', $today)
+                      ->whereDate('tanggal_akhir', '>=', $today);
+            })
+            ->whereIn('status', ['scheduled', 'ongoing'])
+            ->orderBy('tanggal_mulai', 'asc')
+            ->get();
+
         // Get participants being mentored by this mentor
         $participants = collect();
         
@@ -47,6 +59,7 @@ class MentorDashboardController extends Controller
             'mentor',
             'participants',
             'jadwals',
+            'todaySchedules',
             'totalParticipants',
             'activeSchedules',
             'completedSchedules',
