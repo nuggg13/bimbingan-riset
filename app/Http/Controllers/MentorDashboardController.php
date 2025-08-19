@@ -20,8 +20,9 @@ class MentorDashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Get today's schedules
+        // Get today's schedules (filter by hari)
         $today = now()->format('Y-m-d');
+        $todayName = strtolower(now()->locale('id')->dayName); // e.g. 'selasa'
         $todaySchedules = Jadwal::with(['pendaftaran.peserta'])
             ->where('id_mentor', $mentor->id_mentor)
             ->where(function($query) use ($today) {
@@ -29,6 +30,9 @@ class MentorDashboardController extends Controller
                       ->whereDate('tanggal_akhir', '>=', $today);
             })
             ->whereIn('status', ['scheduled', 'ongoing'])
+            ->where(function($query) use ($todayName) {
+                $query->whereRaw('LOWER(hari) LIKE ?', ["%$todayName%"]);
+            })
             ->orderBy('tanggal_mulai', 'asc')
             ->get();
 

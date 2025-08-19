@@ -64,6 +64,20 @@
                             <dd class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($jadwal->tanggal_mulai)->format('d F Y') }}</dd>
                         </div>
                         <div>
+                            <dt class="text-sm font-medium text-gray-500">Hari</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                @if($jadwal->hari)
+                                    @php
+                                        $hariArray = explode(',', $jadwal->hari);
+                                        $hariFormatted = array_map(function($hari) { return ucfirst(trim($hari)); }, $hariArray);
+                                    @endphp
+                                    {{ implode(', ', $hariFormatted) }}
+                                @else
+                                    -
+                                @endif
+                            </dd>
+                        </div>
+                        <div>
                             <dt class="text-sm font-medium text-gray-500">Tanggal Akhir</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($jadwal->tanggal_akhir)->format('d F Y') }}</dd>
                         </div>
