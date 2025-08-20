@@ -172,7 +172,6 @@ class MentorCatatanBimbinganController extends Controller
         $mentor = Auth::guard('mentor')->user();
         
         $request->validate([
-            'tanggal_update' => 'required|date',
             'deskripsi_progress' => 'required|string',
             'persentase' => 'required|numeric|min:0|max:100',
         ]);
@@ -190,7 +189,7 @@ class MentorCatatanBimbinganController extends Controller
 
         UpdateProgress::create([
             'id_catatan' => $catatan->id_catatan,
-            'tanggal_update' => $request->tanggal_update,
+            'tanggal_update' => now()->toDateString(), // Automatically set to today
             'deskripsi_progress' => $request->deskripsi_progress,
             'persentase' => $request->persentase,
             'created_at' => now(),
@@ -200,66 +199,7 @@ class MentorCatatanBimbinganController extends Controller
             ->with('success', 'Progress berhasil ditambahkan.');
     }
 
-    public function updateProgress(Request $request, $catatanId, $progressId)
-    {
-        $mentor = Auth::guard('mentor')->user();
-        
-        $request->validate([
-            'tanggal_update' => 'required|date',
-            'deskripsi_progress' => 'required|string',
-            'persentase' => 'required|numeric|min:0|max:100',
-        ]);
-
-        $catatan = CatatanBimbingan::findOrFail($catatanId);
-        
-        // Verify mentor has access to this participant
-        $hasAccess = Peserta::whereHas('pendaftaran.jadwals', function($query) use ($mentor) {
-            $query->where('id_mentor', $mentor->id_mentor);
-        })->where('id_peserta', $catatan->id_peserta)->exists();
-
-        if (!$hasAccess) {
-            abort(403, 'Anda tidak memiliki akses ke catatan ini.');
-        }
-
-        $progress = UpdateProgress::where('id_progress', $progressId)
-            ->where('id_catatan', $catatanId)
-            ->firstOrFail();
-
-        $progress->update([
-            'tanggal_update' => $request->tanggal_update,
-            'deskripsi_progress' => $request->deskripsi_progress,
-            'persentase' => $request->persentase,
-        ]);
-
-        return redirect()->route('mentor.catatan-bimbingan.show', $catatanId)
-            ->with('success', 'Progress berhasil diperbarui.');
-    }
-
-    public function deleteProgress($catatanId, $progressId)
-    {
-        $mentor = Auth::guard('mentor')->user();
-        
-        $catatan = CatatanBimbingan::findOrFail($catatanId);
-        
-        // Verify mentor has access to this participant
-        $hasAccess = Peserta::whereHas('pendaftaran.jadwals', function($query) use ($mentor) {
-            $query->where('id_mentor', $mentor->id_mentor);
-        })->where('id_peserta', $catatan->id_peserta)->exists();
-
-        if (!$hasAccess) {
-            abort(403, 'Anda tidak memiliki akses ke catatan ini.');
-        }
-
-        $progress = UpdateProgress::where('id_progress', $progressId)
-            ->where('id_catatan', $catatanId)
-            ->firstOrFail();
-
-        $progress->delete();
-
-        return redirect()->route('mentor.catatan-bimbingan.show', $catatanId)
-            ->with('success', 'Progress berhasil dihapus.');
-    }
-
+    
     public function export()
     {
         $mentor = Auth::guard('mentor')->user();
