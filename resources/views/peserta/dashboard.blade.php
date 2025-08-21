@@ -249,10 +249,15 @@
                                 <h4 class="font-semibold text-gray-900">{{ $catatan->tanggal_bimbingan->format('d F Y') }}</h4>
                                 <div class="flex items-center space-x-2">
                                     @php
-                                        $statusClass = $catatan->status == 'completed' ? 'bg-green-100 text-green-800' :
-                                            ($catatan->status == 'published' ? 'bg-blue-100 text-blue-800' :
-                                            ($catatan->status == 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-gray-100 text-gray-800'));
+                                        if ($catatan->status == 'completed') {
+                                            $statusClass = 'bg-green-100 text-green-800';
+                                        } elseif ($catatan->status == 'published') {
+                                            $statusClass = 'bg-blue-100 text-blue-800';
+                                        } elseif ($catatan->status == 'reviewed') {
+                                            $statusClass = 'bg-yellow-100 text-yellow-800';
+                                        } else {
+                                            $statusClass = 'bg-gray-100 text-gray-800';
+                                        }
                                     @endphp
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
                                         {{ $catatan->status_label }}
@@ -370,11 +375,10 @@
     </div>
 </div>
 
-@push('scripts')
 <script>
-// Notes data for detail modal
-const notesData = @json($catatanBimbingan->keyBy('id_catatan')->map(function($catatan) {
-    return array(
+// Data untuk modal
+var notesData = {!! json_encode($catatanBimbingan->keyBy('id_catatan')->map(function($catatan) {
+    return [
         'id' => $catatan->id_catatan,
         'tanggal' => $catatan->tanggal_bimbingan->format('d F Y'),
         'status' => $catatan->status,
@@ -382,16 +386,15 @@ const notesData = @json($catatanBimbingan->keyBy('id_catatan')->map(function($ca
         'hasil_bimbingan' => $catatan->hasil_bimbingan,
         'tugas_perbaikan' => $catatan->tugas_perbaikan,
         'catatan_mentor' => $catatan->catatan_mentor,
-        'progress' => ($catatan->latest_progress ? array(
+        'progress' => ($catatan->latest_progress ? [
             'persentase' => $catatan->latest_progress->persentase,
             'deskripsi' => $catatan->latest_progress->deskripsi_progress
-        ) : null)
-    );
-}));
+        ] : null)
+    ];
+})) !!};
 
-// Schedule data for calendar
-const scheduleData = @json($jadwals->map(function($jadwal) {
-    return array(
+var scheduleData = {!! json_encode($jadwals->map(function($jadwal) {
+    return [
         'id' => $jadwal->id_jadwal,
         'start' => $jadwal->tanggal_mulai->toDateString(),
         'end' => $jadwal->tanggal_akhir->toDateString(),
@@ -400,255 +403,293 @@ const scheduleData = @json($jadwals->map(function($jadwal) {
         'status' => $jadwal->status,
         'status_label' => $jadwal->status_label,
         'hari' => $jadwal->hari
-    );
-}));
+    ];
+})) !!};
 
+// Calendar variables
+var currentPeserta = new Date();
+var selectedDatePeserta = null;
+var monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+// Modal functions
 function showAllNotes() {
-    document.getElementById('allNotesModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    var modal = document.getElementById('allNotesModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeAllNotes() {
-    document.getElementById('allNotesModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    var modal = document.getElementById('allNotesModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 function showNoteDetail(noteId) {
-    const note = notesData[noteId];
+    var note = notesData[noteId];
     if (!note) return;
-    
-    const statusClass = note.status === 'completed' ? 'bg-green-100 text-green-800' :
-                       note.status === 'published' ? 'bg-blue-100 text-blue-800' :
-                       note.status === 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
-                       'bg-gray-100 text-gray-800';
-    
-        const content = `
-        <div class="border-b border-gray-200 pb-4 mb-4">
-            <div class="flex items-center justify-between">
-                <h4 class="text-lg font-semibold text-gray-900">${note.tanggal}</h4>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
-                    ${note.status_label}
-                </span>
-            </div>
-        </div>
-        
-        <div class="space-y-4">
-            <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Hasil Bimbingan:</h5>
-                <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">${note.hasil_bimbingan || 'Tidak ada catatan hasil bimbingan'}</div>
-            </div>
-            
-            ${note.tugas_perbaikan ? `
-            <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Tugas Perbaikan:</h5>
-                <div class="bg-yellow-50 rounded-lg p-3 text-sm text-gray-700">${note.tugas_perbaikan}</div>
-            </div>
-            ` : ''}
-            
-            ${note.catatan_mentor ? `
-            <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Catatan Mentor:</h5>
-                <div class="bg-blue-50 rounded-lg p-3 text-sm text-gray-700">${note.catatan_mentor}</div>
-            </div>
-            ` : ''}
-            
-            ${note.progress ? `
-            <div>
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Progress:</h5>
-                <div class="bg-green-50 rounded-lg p-3">
-                    <div class="flex items-center mb-2">
-                        <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                            <div class="bg-green-600 h-2 rounded-full" style="width: ${note.progress.persentase}%"></div>
-                        </div>
-                        <span class="text-sm font-medium text-green-600">${note.progress.persentase}%</span>
-                    </div>
-                    <p class="text-sm text-gray-600">${note.progress.deskripsi}</p>
-                </div>
-            </div>
-            ` : ''}
-        </div>
-    `;
-    
-    document.getElementById('noteDetailContent').innerHTML = content;
-    document.getElementById('noteDetailModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+
+    var statusClassMap = {
+        'completed': 'bg-green-100 text-green-800',
+        'published': 'bg-blue-100 text-blue-800',
+        'reviewed': 'bg-yellow-100 text-yellow-800'
+    };
+    var statusClass = statusClassMap[note.status] || 'bg-gray-100 text-gray-800';
+
+    var content = '<div class="border-b border-gray-200 pb-4 mb-4">' +
+        '<div class="flex items-center justify-between">' +
+        '<h4 class="text-lg font-semibold text-gray-900">' + note.tanggal + '</h4>' +
+        '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + statusClass + '">' +
+        note.status_label + '</span></div></div>' +
+        '<div class="space-y-4">' +
+        '<div><h5 class="text-sm font-medium text-gray-700 mb-2">Hasil Bimbingan:</h5>' +
+        '<div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">' + (note.hasil_bimbingan || 'Tidak ada catatan hasil bimbingan') + '</div></div>';
+
+    if (note.tugas_perbaikan) {
+        content += '<div><h5 class="text-sm font-medium text-gray-700 mb-2">Tugas Perbaikan:</h5>' +
+            '<div class="bg-yellow-50 rounded-lg p-3 text-sm text-gray-700">' + note.tugas_perbaikan + '</div></div>';
+    }
+
+    if (note.catatan_mentor) {
+        content += '<div><h5 class="text-sm font-medium text-gray-700 mb-2">Catatan Mentor:</h5>' +
+            '<div class="bg-blue-50 rounded-lg p-3 text-sm text-gray-700">' + note.catatan_mentor + '</div></div>';
+    }
+
+    if (note.progress) {
+        content += '<div><h5 class="text-sm font-medium text-gray-700 mb-2">Progress:</h5>' +
+            '<div class="bg-green-50 rounded-lg p-3">' +
+            '<div class="flex items-center mb-2">' +
+            '<div class="w-32 bg-gray-200 rounded-full h-2 mr-3">' +
+            '<div class="bg-green-600 h-2 rounded-full" style="width: ' + note.progress.persentase + '%"></div></div>' +
+            '<span class="text-sm font-medium text-green-600">' + note.progress.persentase + '%</span></div>' +
+            '<p class="text-sm text-gray-600">' + note.progress.deskripsi + '</p></div></div>';
+    }
+
+    content += '</div>';
+
+    var contentElement = document.getElementById('noteDetailContent');
+    if (contentElement) {
+        contentElement.innerHTML = content;
+    }
+    var modal = document.getElementById('noteDetailModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeNoteDetail() {
-    document.getElementById('noteDetailModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    var modal = document.getElementById('noteDetailModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
 }
 
 function showScheduleCalendar() {
-    document.getElementById('scheduleCalendarModal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    renderPesertaCalendar();
+    var modal = document.getElementById('scheduleCalendarModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        renderPesertaCalendar();
+    }
 }
 
 function closeScheduleCalendar() {
-    document.getElementById('scheduleCalendarModal').classList.add('hidden');
-    document.body.style.overflow = 'auto';
+    var modal = document.getElementById('scheduleCalendarModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
 }
 
-// Calendar functionality for peserta
-let currentPeserta = new Date();
-let selectedDatePeserta = null;
-
-const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-
+// Calendar functions
 function formatDateKey(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const day = String(d.getDate()).padStart(2,'0');
-    return `${y}-${m}-${day}`;
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
 }
 
 function dateInRange(dateStr, startStr, endStr) {
-    if(!startStr || !endStr) return false;
+    if (!startStr || !endStr) return false;
     return dateStr >= startStr && dateStr <= endStr;
 }
 
 function renderPesertaCalendar() {
-    const year = currentPeserta.getFullYear();
-    const month = currentPeserta.getMonth();
-    document.getElementById('currentMonthPeserta').textContent = `${monthNames[month]} ${year}`;
+    var year = currentPeserta.getFullYear();
+    var month = currentPeserta.getMonth();
+    var currentMonthElement = document.getElementById('currentMonthPeserta');
+    if (currentMonthElement) {
+        currentMonthElement.textContent = monthNames[month] + ' ' + year;
+    }
 
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
+    var firstDay = new Date(year, month, 1);
+    var lastDay = new Date(year, month + 1, 0);
 
-    let startOffset = firstDay.getDay();
+    var startOffset = firstDay.getDay();
     startOffset = (startOffset === 0) ? 6 : startOffset - 1;
 
-    const calendarGrid = document.getElementById('calendarGridPeserta');
+    var calendarGrid = document.getElementById('calendarGridPeserta');
+    if (!calendarGrid) return;
     calendarGrid.innerHTML = '';
 
-    // Previous month placeholders
-    for(let i=0; i<startOffset; i++){
-        const cell = document.createElement('div');
+    // Placeholder bulan sebelumnya
+    for (var i = 0; i < startOffset; i++) {
+        var cell = document.createElement('div');
         cell.className = 'border rounded-lg p-2 h-24 bg-gray-50';
         calendarGrid.appendChild(cell);
     }
 
-    for(let day=1; day<=lastDay.getDate(); day++){
-        const d = new Date(year, month, day);
-        const key = formatDateKey(d);
+    for (var day = 1; day <= lastDay.getDate(); day++) {
+        var d = new Date(year, month, day);
+        var key = formatDateKey(d);
 
-        const cell = document.createElement('div');
+        var cell = document.createElement('div');
         cell.className = 'border rounded-lg p-2 h-24 hover:shadow transition cursor-pointer relative';
 
-        const label = document.createElement('div');
+        var label = document.createElement('div');
         label.className = 'text-xs font-semibold text-gray-600';
         label.textContent = day;
         cell.appendChild(label);
 
-        const daySchedules = scheduleData.filter(s => dateInRange(key, s.start, s.end));
-        
-        const container = document.createElement('div');
+        var daySchedules = scheduleData.filter(function(s) {
+            return dateInRange(key, s.start, s.end);
+        });
+
+        var container = document.createElement('div');
         container.className = 'mt-1 space-y-1 overflow-y-auto max-h-16';
 
-        daySchedules.slice(0,2).forEach(s => {
-            const chip = document.createElement('div');
-            const colorMap = {
+        daySchedules.slice(0, 2).forEach(function(s) {
+            var chip = document.createElement('div');
+            var colorMap = {
                 scheduled: 'bg-blue-100 text-blue-800',
                 ongoing: 'bg-green-100 text-green-800',
                 completed: 'bg-gray-100 text-gray-800',
                 cancelled: 'bg-red-100 text-red-800',
             };
-            chip.className = `text-xs ${colorMap[s.status] || 'bg-gray-100 text-gray-800'} px-1 py-0.5 rounded truncate`;
-            chip.textContent = `${s.startTime}-${s.endTime}`;
+            chip.className = 'text-xs ' + (colorMap[s.status] || 'bg-gray-100 text-gray-800') + ' px-1 py-0.5 rounded truncate';
+            chip.textContent = s.startTime + '-' + s.endTime;
             container.appendChild(chip);
         });
 
-        if(daySchedules.length > 2){
-            const more = document.createElement('div');
+        if (daySchedules.length > 2) {
+            var more = document.createElement('div');
             more.className = 'text-xs text-gray-500';
-            more.textContent = `+${daySchedules.length - 2}`;
+            more.textContent = '+' + (daySchedules.length - 2);
             container.appendChild(more);
         }
 
         cell.appendChild(container);
 
-        const today = new Date();
-        if(today.toDateString() === d.toDateString()){
-            const dot = document.createElement('div');
+        var today = new Date();
+        if (today.toDateString() === d.toDateString()) {
+            var dot = document.createElement('div');
             dot.className = 'w-1.5 h-1.5 bg-green-500 rounded-full absolute top-1 right-1';
             cell.appendChild(dot);
         }
 
-        cell.addEventListener('click', () => {
-            selectedDatePeserta = key;
-            renderSelectedDayPeserta();
-        });
+        cell.addEventListener('click', function(dateKey) {
+            return function() {
+                selectedDatePeserta = dateKey;
+                renderSelectedDayPeserta();
+            };
+        }(key));
 
         calendarGrid.appendChild(cell);
     }
 }
 
 function renderSelectedDayPeserta() {
-    if(!selectedDatePeserta) return;
-    
-    document.getElementById('selectedDateLabelPeserta').textContent = 
-        new Date(selectedDatePeserta).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    if (!selectedDatePeserta) return;
 
-    const daySchedules = scheduleData.filter(s => dateInRange(selectedDatePeserta, s.start, s.end));
+    var dateLabel = document.getElementById('selectedDateLabelPeserta');
+    if (dateLabel) {
+        dateLabel.textContent = new Date(selectedDatePeserta).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
 
-    if(daySchedules.length === 0){
-        document.getElementById('selectedDayListPeserta').innerHTML = 
-            '<p class="text-gray-500 text-sm">Tidak ada jadwal pada tanggal ini.</p>';
+    var daySchedules = scheduleData.filter(function(s) {
+        return dateInRange(selectedDatePeserta, s.start, s.end);
+    });
+
+    var listElement = document.getElementById('selectedDayListPeserta');
+    if (!listElement) return;
+
+    if (daySchedules.length === 0) {
+        listElement.innerHTML = '<p class="text-gray-500 text-sm">Tidak ada jadwal pada tanggal ini.</p>';
         return;
     }
 
-    const html = daySchedules.map(s => `
-        <div class="flex items-center justify-between p-3 mb-2 bg-white rounded-lg border">
-            <div>
-                <div class="font-medium text-gray-900">${s.startTime} - ${s.endTime}</div>
-                ${s.hari ? `<div class="text-sm text-gray-500">${s.hari}</div>` : ''}
-            </div>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                ${s.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
-                  s.status === 'ongoing' ? 'bg-green-100 text-green-800' :
-                  s.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                  'bg-red-100 text-red-800'}">
-                ${s.status_label}
-            </span>
-        </div>
-    `).join('');
+    var statusColorMap = {
+        'scheduled': 'bg-blue-100 text-blue-800',
+        'ongoing': 'bg-green-100 text-green-800',
+        'completed': 'bg-gray-100 text-gray-800',
+        'cancelled': 'bg-red-100 text-red-800'
+    };
 
-    document.getElementById('selectedDayListPeserta').innerHTML = html;
+    var html = daySchedules.map(function(s) {
+        return '<div class="flex items-center justify-between p-3 mb-2 bg-white rounded-lg border">' +
+            '<div><div class="font-medium text-gray-900">' + s.startTime + ' - ' + s.endTime + '</div>' +
+            (s.hari ? '<div class="text-sm text-gray-500">' + s.hari + '</div>' : '') + '</div>' +
+            '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' +
+            (statusColorMap[s.status] || 'bg-gray-100 text-gray-800') + '">' + s.status_label + '</span></div>';
+    }).join('');
+
+    listElement.innerHTML = html;
 }
 
-// Event listeners
-document.getElementById('prevMonthPeserta').addEventListener('click', () => {
-    currentPeserta.setMonth(currentPeserta.getMonth() - 1);
-    renderPesertaCalendar();
-});
-
-document.getElementById('nextMonthPeserta').addEventListener('click', () => {
-    currentPeserta.setMonth(currentPeserta.getMonth() + 1);
-    renderPesertaCalendar();
-});
-
-// Close modals when clicking outside
-document.getElementById('allNotesModal').addEventListener('click', function(e) {
-    if (e.target === this) closeAllNotes();
-});
-
-document.getElementById('noteDetailModal').addEventListener('click', function(e) {
-    if (e.target === this) closeNoteDetail();
-});
-
-document.getElementById('scheduleCalendarModal').addEventListener('click', function(e) {
-    if (e.target === this) closeScheduleCalendar();
-});
-
-// Close modals with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeAllNotes();
-        closeNoteDetail();
-        closeScheduleCalendar();
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Calendar navigation
+    var prevMonthBtn = document.getElementById('prevMonthPeserta');
+    if (prevMonthBtn) {
+        prevMonthBtn.addEventListener('click', function() {
+            currentPeserta.setMonth(currentPeserta.getMonth() - 1);
+            renderPesertaCalendar();
+        });
     }
+
+    var nextMonthBtn = document.getElementById('nextMonthPeserta');
+    if (nextMonthBtn) {
+        nextMonthBtn.addEventListener('click', function() {
+            currentPeserta.setMonth(currentPeserta.getMonth() + 1);
+            renderPesertaCalendar();
+        });
+    }
+
+    // Modal click outside to close
+    var allNotesModal = document.getElementById('allNotesModal');
+    if (allNotesModal) {
+        allNotesModal.addEventListener('click', function(e) {
+            if (e.target === this) closeAllNotes();
+        });
+    }
+
+    var noteDetailModal = document.getElementById('noteDetailModal');
+    if (noteDetailModal) {
+        noteDetailModal.addEventListener('click', function(e) {
+            if (e.target === this) closeNoteDetail();
+        });
+    }
+
+    var scheduleCalendarModal = document.getElementById('scheduleCalendarModal');
+    if (scheduleCalendarModal) {
+        scheduleCalendarModal.addEventListener('click', function(e) {
+            if (e.target === this) closeScheduleCalendar();
+        });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAllNotes();
+            closeNoteDetail();
+            closeScheduleCalendar();
+        }
+    });
 });
 </script>
-@endpush
 @endsection
