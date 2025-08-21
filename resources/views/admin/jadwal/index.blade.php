@@ -209,7 +209,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peserta</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mentor</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hari</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -243,7 +243,19 @@
                                     <div class="text-gray-500">s/d {{ \Carbon\Carbon::parse($item->tanggal_akhir)->format('d/m/Y') }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $item->jam_mulai }} - {{ $item->jam_akhir }}
+                                    @if($item->hari)
+                                        @php
+                                            $hariArray = explode(',', $item->hari);
+                                            $hariFormatted = array_map(function($hari) {
+                                                return ucfirst(trim($hari));
+                                            }, $hariArray);
+                                        @endphp
+                                        <div class="text-sm text-gray-900">
+                                            {{ implode(', ', $hariFormatted) }}
+                                        </div>
+                                    @else
+                                        <span class="text-sm text-gray-500">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
