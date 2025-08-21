@@ -4,16 +4,22 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
+    <!-- Header + Search -->
     <div class="bg-white rounded-lg shadow-sm p-6">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-800">Peserta Bimbingan</h1>
                 <p class="text-gray-600 mt-1">Daftar peserta yang Anda bimbing</p>
             </div>
-            <div class="text-right">
-                <p class="text-sm text-gray-500">Total Peserta</p>
-                <p class="text-2xl font-bold text-green-600">{{ $participants->count() }}</p>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <div class="relative">
+                    <input id="participantSearch" type="text" placeholder="Cari nama, email, instansi, judul riset..." class="w-full sm:w-80 pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" />
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Total Peserta</p>
+                    <p class="text-2xl font-bold text-green-600" id="participantCount">{{ $participants->count() }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -111,4 +117,44 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('participantSearch');
+    const participantCount = document.getElementById('participantCount');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        let visibleCount = 0;
+        
+        tableRows.forEach(row => {
+            const participantName = row.querySelector('td:nth-child(1) .text-gray-900').textContent.toLowerCase();
+            const participantEmail = row.querySelector('td:nth-child(1) .text-gray-500:nth-child(1)').textContent.toLowerCase();
+            const participantInstansi = row.querySelector('td:nth-child(1) .text-gray-500:nth-child(2)').textContent.toLowerCase();
+            const judulRiset = row.querySelector('td:nth-child(2) .font-medium').textContent.toLowerCase();
+            const minatKeilmuan = row.querySelector('td:nth-child(2) .text-gray-500:nth-child(1)').textContent.toLowerCase();
+            const basisSistem = row.querySelector('td:nth-child(2) .text-gray-500:nth-child(2)').textContent.toLowerCase();
+            
+            const isVisible = participantName.includes(searchTerm) ||
+                            participantEmail.includes(searchTerm) ||
+                            participantInstansi.includes(searchTerm) ||
+                            judulRiset.includes(searchTerm) ||
+                            minatKeilmuan.includes(searchTerm) ||
+                            basisSistem.includes(searchTerm);
+            
+            if (isVisible) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        participantCount.textContent = visibleCount;
+    });
+});
+</script>
+@endpush
 @endsection
