@@ -95,7 +95,5 @@ Route::prefix('mentor')->group(function () {
         Route::resource('catatan-bimbingan', App\Http\Controllers\MentorCatatanBimbinganController::class, ['as' => 'mentor']);
         Route::get('/catatan-bimbingan/export', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'export'])->name('mentor.catatan-bimbingan.export');
         Route::post('/catatan-bimbingan/{id}/progress', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'addProgress'])->name('mentor.catatan-bimbingan.addProgress');
-        Route::put('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'updateProgress'])->name('mentor.catatan-bimbingan.updateProgress');
-        Route::delete('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\MentorCatatanBimbinganController::class, 'deleteProgress'])->name('mentor.catatan-bimbingan.deleteProgress');
     });
 });

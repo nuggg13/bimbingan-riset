@@ -38,7 +38,15 @@ class PesertaDashboardController extends Controller
                     $mentor = $jadwals->first()->mentor;
                 }
                 
-                return view('peserta.dashboard', compact('peserta', 'pendaftaran', 'jadwals', 'activeJadwal', 'mentor'));
+                // Get catatan bimbingan for this peserta
+                $catatanBimbingan = $peserta->catatanBimbingan()
+                    ->with(['updateProgress' => function($query) {
+                        $query->latest('created_at');
+                    }])
+                    ->orderBy('tanggal_bimbingan', 'desc')
+                    ->get();
+                
+                return view('peserta.dashboard', compact('peserta', 'pendaftaran', 'jadwals', 'activeJadwal', 'mentor', 'catatanBimbingan'));
             default:
                 return view('peserta.status', compact('peserta', 'pendaftaran'));
         }

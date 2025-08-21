@@ -63,7 +63,7 @@ class CatatanBimbingan extends Model
 
     public function getLatestProgressAttribute()
     {
-        return $this->updateProgress()->latest('tanggal_update')->first();
+        return $this->updateProgress()->latest('created_at')->first();
     }
 
     public function getTotalProgressPercentageAttribute()
