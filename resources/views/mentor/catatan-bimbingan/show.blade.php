@@ -13,14 +13,8 @@
                 </a>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">Detail Catatan Bimbingan</h1>
-                    <p class="text-gray-600 mt-1">{{ $catatan->peserta->nama }} - {{ $catatan->tanggal_bimbingan->format('d M Y') }}</p>
+                    <p class="text-gray-600 mt-1">{{ $catatan->peserta->nama }} - Semua Catatan Bimbingan</p>
                 </div>
-            </div>
-            <div class="flex space-x-3">
-                <a href="{{ route('mentor.catatan-bimbingan.edit', $catatan->id_catatan) }}" 
-                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
-                    <i class="fas fa-edit mr-2"></i>Edit Catatan
-                </a>
             </div>
         </div>
     </div>
@@ -35,151 +29,91 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Catatan Details -->
+            <!-- All Notes for this Participant -->
             <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 mb-6">
                     <i class="fas fa-sticky-note text-green-600 mr-2"></i>Informasi Catatan
                 </h2>
                 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500">Tanggal Bimbingan</label>
-                        <p class="mt-1 text-sm text-gray-900">{{ $catatan->tanggal_bimbingan->format('d M Y') }}</p>
-                    </div>
+                @php
+                    $allNotes = \App\Models\CatatanBimbingan::where('id_peserta', $catatan->id_peserta)
+                                ->orderBy('tanggal_bimbingan', 'desc')
+                                ->get();
+                @endphp
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500">Hasil Bimbingan</label>
-                        <div class="mt-1 text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $catatan->hasil_bimbingan !!}</div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500">Tugas Perbaikan</label>
-                        <div class="mt-1 text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $catatan->tugas_perbaikan !!}</div>
-                    </div>
-
-                    @if($catatan->catatan_tambahan)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500">Catatan Tambahan</label>
-                        <div class="mt-1 text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $catatan->catatan_tambahan !!}</div>
-                    </div>
-                    @endif
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-500">Status</label>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1
-                            @if($catatan->status == 'completed') bg-green-100 text-green-800
-                            @elseif($catatan->status == 'published') bg-blue-100 text-blue-800
-                            @elseif($catatan->status == 'reviewed') bg-yellow-100 text-yellow-800
-                            @else bg-gray-100 text-gray-800
-                            @endif">
-                            {{ $catatan->status_label }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Progress Updates -->
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>Update Progress
-                </h2>
-
-                <!-- Current Progress Display -->
-                @if($catatan->updateProgress->count() > 0)
-                    @php
-                        $latestProgress = $catatan->updateProgress->sortByDesc('created_at')->first();
-                    @endphp
-                    <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center">
-                                <div class="w-16 h-16 rounded-full flex items-center justify-center mr-4" 
-                                     style="background: linear-gradient(135deg, 
-                                        {{ $latestProgress->persentase <= 20 ? '#fee2e2' : ($latestProgress->persentase <= 40 ? '#fef3c7' : ($latestProgress->persentase <= 60 ? '#dbeafe' : ($latestProgress->persentase <= 80 ? '#d1fae5' : '#dcfce7'))) }}, 
-                                        {{ $latestProgress->persentase <= 20 ? '#fecaca' : ($latestProgress->persentase <= 40 ? '#fde68a' : ($latestProgress->persentase <= 60 ? '#93c5fd' : ($latestProgress->persentase <= 80 ? '#86efac' : '#bbf7d0'))) }})">
-                                    <span class="font-bold text-lg" 
-                                          style="color: {{ $latestProgress->persentase <= 20 ? '#dc2626' : ($latestProgress->persentase <= 40 ? '#d97706' : ($latestProgress->persentase <= 60 ? '#2563eb' : ($latestProgress->persentase <= 80 ? '#059669' : '#16a34a'))) }}">
-                                        {{ number_format($latestProgress->persentase, 0) }}%
+                <div class="space-y-6">
+                    @foreach($allNotes as $note)
+                        <div class="border border-gray-200 rounded-lg p-4 {{ $note->id_catatan == $catatan->id_catatan ? 'bg-blue-50 border-blue-300' : '' }}">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-calendar text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">{{ $note->tanggal_bimbingan->format('d F Y') }}</h3>
+                                        <p class="text-sm text-gray-500">{{ $note->tanggal_bimbingan->diffForHumans() }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        @if($note->status == 'completed') bg-green-100 text-green-800
+                                        @elseif($note->status == 'published') bg-blue-100 text-blue-800
+                                        @elseif($note->status == 'reviewed') bg-yellow-100 text-yellow-800
+                                        @else bg-gray-100 text-gray-800
+                                        @endif">
+                                        {{ $note->status_label }}
                                     </span>
+                                    <div class="flex space-x-1">
+                                        <a href="{{ route('mentor.catatan-bimbingan.edit', $note->id_catatan) }}" 
+                                           class="text-blue-600 hover:text-blue-900 p-1">
+                                            <i class="fas fa-edit text-sm"></i>
+                                        </a>
+                                        <form method="POST" action="{{ route('mentor.catatan-bimbingan.destroy', $note->id_catatan) }}" 
+                                              class="inline" onsubmit="return confirm('Yakin ingin menghapus catatan ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 p-1">
+                                                <i class="fas fa-trash text-sm"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div class="space-y-3">
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900">{{ $latestProgress->progress_status }}</h3>
-                                    <p class="text-sm text-gray-600">Progress Terkini</p>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Hasil Bimbingan</label>
+                                    <div class="text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $note->hasil_bimbingan !!}</div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
-                            <div class="h-3 rounded-full transition-all duration-500" 
-                                 style="width: {{ $latestProgress->persentase }}%; 
-                                        background: linear-gradient(90deg, 
-                                            {{ $latestProgress->persentase <= 20 ? '#ef4444' : ($latestProgress->persentase <= 40 ? '#f59e0b' : ($latestProgress->persentase <= 60 ? '#3b82f6' : ($latestProgress->persentase <= 80 ? '#10b981' : '#22c55e'))) }}, 
-                                            {{ $latestProgress->persentase <= 20 ? '#dc2626' : ($latestProgress->persentase <= 40 ? '#d97706' : ($latestProgress->persentase <= 60 ? '#2563eb' : ($latestProgress->persentase <= 80 ? '#059669' : '#16a34a'))) }})">
-                            </div>
-                        </div>
-                        <p class="text-sm text-gray-700 leading-relaxed">{{ $latestProgress->deskripsi_progress }}</p>
-                    </div>
-                @endif
 
-                <!-- Add Progress Form -->
-                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                    <form method="POST" action="{{ route('mentor.catatan-bimbingan.addProgress', $catatan->id_catatan) }}">
-                        @csrf
-                        <div class="space-y-4">
-                            <div>
-                                <label for="persentase" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Persentase Progress: <span id="percentageValue" class="font-semibold text-blue-600">0%</span>
-                                </label>
-                                <input type="range" name="persentase" id="persentase" min="0" max="100" step="1" value="0"
-                                       class="w-full h-3 rounded-lg appearance-none cursor-pointer slider"
-                                       oninput="updateSliderColor(this.value)">
-                            </div>
-                            <div>
-                                <label for="deskripsi_progress" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Progress</label>
-                                <textarea name="deskripsi_progress" id="deskripsi_progress" rows="3" required
-                                          placeholder="Deskripsikan progress yang telah dicapai..."
-                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
-                            </div>
-                            <div class="flex justify-end">
-                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition duration-200">
-                                    <i class="fas fa-save mr-2"></i>Simpan Progress
-                                </button>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Tugas Perbaikan</label>
+                                    <div class="text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $note->tugas_perbaikan !!}</div>
+                                </div>
+
+                                @if($note->catatan_tambahan)
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Catatan Tambahan</label>
+                                    <div class="text-sm text-gray-900 leading-relaxed prose prose-sm max-w-none">{!! $note->catatan_tambahan !!}</div>
+                                </div>
+                                @endif
+
+                                @if($note->latest_progress)
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Progress Terbaru</label>
+                                    <div class="flex items-center mt-2">
+                                        <div class="w-20 bg-gray-200 rounded-full h-2 mr-3">
+                                            <div class="bg-green-600 h-2 rounded-full" 
+                                                 style="width: {{ $note->latest_progress->persentase }}%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-green-600">{{ $note->latest_progress->persentase }}%</span>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                         </div>
-                    </form>
+                    @endforeach
                 </div>
-
-                <!-- Progress History -->
-                @if($catatan->updateProgress->count() > 0)
-                    <div class="border-t pt-6">
-                        <h3 class="text-md font-semibold text-gray-800 mb-4">
-                            <i class="fas fa-history text-gray-600 mr-2"></i>Riwayat Progress
-                        </h3>
-                        <div class="space-y-3">
-                            @foreach($catatan->updateProgress->sortByDesc('created_at') as $progress)
-                                <div class="flex items-start space-x-4 p-3 bg-gray-50 rounded-lg">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-semibold"
-                                             style="background-color: {{ $progress->persentase <= 20 ? '#fee2e2' : ($progress->persentase <= 40 ? '#fef3c7' : ($progress->persentase <= 60 ? '#dbeafe' : ($progress->persentase <= 80 ? '#d1fae5' : '#dcfce7'))) }};
-                                                    color: {{ $progress->persentase <= 20 ? '#dc2626' : ($progress->persentase <= 40 ? '#d97706' : ($progress->persentase <= 60 ? '#2563eb' : ($progress->persentase <= 80 ? '#059669' : '#16a34a'))) }}">
-                                            {{ number_format($progress->persentase, 0) }}%
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex items-center justify-between">
-                                            <p class="text-sm font-medium text-gray-900">{{ $progress->created_at->format('d M Y, H:i') }}</p>
-                                        </div>
-                                        <p class="text-sm text-gray-700 mt-1">{{ $progress->deskripsi_progress }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-chart-line text-gray-400 text-4xl mb-4"></i>
-                        <p class="text-gray-500">Belum ada update progress</p>
-                        <p class="text-gray-400 text-sm mt-2">Mulai tambahkan progress untuk melacak perkembangan bimbingan</p>
-                    </div>
-                @endif
             </div>
         </div>
 
@@ -212,6 +146,96 @@
                 </div>
             </div>
 
+            <!-- Update Progress Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>Update Progress
+                </h3>
+
+                @php
+                    $latestProgress = \App\Models\UpdateProgress::whereHas('catatanBimbingan', function($query) use ($catatan) {
+                        $query->where('id_peserta', $catatan->id_peserta);
+                    })->orderBy('created_at', 'desc')->first();
+                @endphp
+
+                <!-- Current Progress Display -->
+                @if($latestProgress)
+                    <div class="mb-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center mr-3 bg-green-100">
+                                    <span class="font-bold text-green-600">{{ number_format($latestProgress->persentase, 0) }}%</span>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-gray-900">Progress Terkini</h4>
+                                    <p class="text-xs text-gray-600">{{ $latestProgress->created_at->format('d M Y') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                            <div class="bg-green-600 h-2 rounded-full transition-all duration-500" 
+                                 style="width: {{ $latestProgress->persentase }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-700">{{ $latestProgress->deskripsi_progress }}</p>
+                    </div>
+                @endif
+
+                <!-- Add Progress Form -->
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <form method="POST" action="{{ route('mentor.catatan-bimbingan.addProgress', $catatan->id_catatan) }}">
+                        @csrf
+                        <div class="space-y-3">
+                            <div>
+                                <label for="persentase" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Persentase: <span id="percentageValue" class="font-semibold text-blue-600">{{ $latestProgress ? $latestProgress->persentase : 0 }}%</span>
+                                </label>
+                                <input type="range" name="persentase" id="persentase" min="0" max="100" step="1" 
+                                       value="{{ $latestProgress ? $latestProgress->persentase : 0 }}"
+                                       class="w-full h-2 rounded-lg appearance-none cursor-pointer slider"
+                                       oninput="updateSliderColor(this.value)">
+                            </div>
+                            <div>
+                                <label for="deskripsi_progress" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                                <textarea name="deskripsi_progress" id="deskripsi_progress" rows="2" required
+                                          placeholder="Deskripsikan progress..."
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                                <i class="fas fa-save mr-2"></i>Update Progress
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Progress History (Smaller) -->
+                @php
+                    $progressHistory = \App\Models\UpdateProgress::whereHas('catatanBimbingan', function($query) use ($catatan) {
+                        $query->where('id_peserta', $catatan->id_peserta);
+                    })->orderBy('created_at', 'desc')->take(5)->get();
+                @endphp
+
+                @if($progressHistory->count() > 0)
+                    <div class="mt-4 pt-4 border-t">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3">
+                            <i class="fas fa-history text-gray-600 mr-1"></i>Riwayat Progress
+                        </h4>
+                        <div class="space-y-2">
+                            @foreach($progressHistory as $progress)
+                                <div class="flex items-center space-x-3 p-2 bg-gray-50 rounded text-xs">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-green-100 text-green-600 font-semibold">
+                                        {{ number_format($progress->persentase, 0) }}%
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium text-gray-900">{{ $progress->created_at->format('d M Y') }}</p>
+                                        <p class="text-gray-600 truncate">{{ $progress->deskripsi_progress }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">
@@ -229,22 +253,6 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Progress Summary -->
-            @if($catatan->latest_progress)
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                    <i class="fas fa-chart-pie text-purple-600 mr-2"></i>Ringkasan Progress
-                </h3>
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-{{ $catatan->latest_progress->progress_color }}-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-{{ $catatan->latest_progress->progress_color }}-600 font-bold text-lg">{{ number_format($catatan->latest_progress->persentase, 0) }}%</span>
-                    </div>
-                    <p class="text-sm font-medium text-gray-900">{{ $catatan->latest_progress->progress_status }}</p>
-                    <p class="text-xs text-gray-500 mt-1">Update terakhir: {{ $catatan->latest_progress->tanggal_update->format('d M Y') }}</p>
-                </div>
-            </div>
-            @endif
         </div>
     </div>
 </div>
@@ -291,8 +299,8 @@ document.addEventListener('DOMContentLoaded', function() {
 .slider {
     -webkit-appearance: none;
     appearance: none;
-    height: 12px;
-    border-radius: 6px;
+    height: 8px;
+    border-radius: 4px;
     background: #e5e7eb;
     outline: none;
     transition: all 0.3s ease;
@@ -301,11 +309,11 @@ document.addEventListener('DOMContentLoaded', function() {
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #ffffff;
-    border: 3px solid #3b82f6;
+    border: 2px solid #3b82f6;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
@@ -317,11 +325,11 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #ffffff;
-    border: 3px solid #3b82f6;
+    border: 2px solid #3b82f6;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;

@@ -20,8 +20,15 @@ class MentorCatatanBimbinganController extends Controller
             $query->where('id_mentor', $mentor->id_mentor);
         })->pluck('id_peserta');
 
+        // Get only the latest note per participant
         $catatanBimbingan = CatatanBimbingan::with(['peserta', 'updateProgress'])
             ->whereIn('id_peserta', $participantIds)
+            ->whereIn('id_catatan', function($query) use ($participantIds) {
+                $query->select(\DB::raw('MAX(id_catatan)'))
+                    ->from('catatan_bimbingan')
+                    ->whereIn('id_peserta', $participantIds)
+                    ->groupBy('id_peserta');
+            })
             ->orderBy('tanggal_bimbingan', 'desc')
             ->paginate(10);
 
