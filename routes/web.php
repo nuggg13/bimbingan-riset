@@ -70,11 +70,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/jadwal/export', [App\Http\Controllers\JadwalController::class, 'export'])->name('admin.jadwal.export');
         
         // Catatan Bimbingan Routes
-        Route::resource('catatan-bimbingan', App\Http\Controllers\CatatanBimbinganController::class, ['as' => 'admin']);
-        Route::get('/catatan-bimbingan/export', [App\Http\Controllers\CatatanBimbinganController::class, 'export'])->name('admin.catatan-bimbingan.export');
-        Route::post('/catatan-bimbingan/{id}/progress', [App\Http\Controllers\CatatanBimbinganController::class, 'addProgress'])->name('admin.catatan-bimbingan.addProgress');
-        Route::put('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\CatatanBimbinganController::class, 'updateProgress'])->name('admin.catatan-bimbingan.updateProgress');
-        Route::delete('/catatan-bimbingan/{catatanId}/progress/{progressId}', [App\Http\Controllers\CatatanBimbinganController::class, 'deleteProgress'])->name('admin.catatan-bimbingan.deleteProgress');
+        // Route catatan-bimbingan untuk admin dihapus
     });
 });
 

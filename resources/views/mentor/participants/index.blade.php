@@ -61,7 +61,9 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 font-medium">{{ $participant->pendaftaran->judul_riset }}</div>
+                                    <div class="text-sm text-gray-900 font-medium" style="max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $participant->pendaftaran->judul_riset }}">
+                                        {{ $participant->pendaftaran->judul_riset }}
+                                    </div>
                                     <div class="text-sm text-gray-500">{{ $participant->pendaftaran->minat_keilmuan }}</div>
                                     <div class="text-sm text-gray-500">{{ $participant->pendaftaran->basis_sistem }}</div>
                                 </td>
