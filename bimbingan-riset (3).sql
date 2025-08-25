@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 15, 2025 at 11:09 PM
+-- Generation Time: Aug 21, 2025 at 06:09 AM
 -- Server version: 8.0.30
--- PHP Version: 8.1.10
+-- PHP Version: 8.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -63,6 +63,15 @@ CREATE TABLE `catatan_bimbingan` (
   `updated_at` timestamp NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `catatan_bimbingan`
+--
+
+INSERT INTO `catatan_bimbingan` (`id_catatan`, `id_peserta`, `tanggal_bimbingan`, `hasil_bimbingan`, `tugas_perbaikan`, `catatan_tambahan`, `status`, `created_at`, `updated_at`) VALUES
+(1, 7, '2025-08-19', 'Selesai CRUD', 'Beri key pada ID table', 'Perbaiki UI nya', 'published', '2025-08-18 20:20:16', '2025-08-18 20:20:16'),
+(2, 7, '2025-08-19', '<p>dwada<em>dawdw</em><strong><em>dawdw</em></strong></p>', '<p>csdcscsdcsd</p>', '<ol><li><strong>cdcdzcdczcczdc<em>czdcd</em></strong></li></ol><ul><li><strong><em>cd</em></strong><strong class=\"ql-font-monospace\"><em>csdcsdccsdc</em></strong><strong class=\"ql-font-monospace\" style=\"background-color: rgb(255, 153, 0);\"><em>csdcdcsdcdscdscdcsdcsdcsdcsdcsdcsdcsdcdcsdcsdcsdcdcsdcdcsdcsdcsddcsdccsdcsd</em></strong></li></ul>', 'published', '2025-08-19 00:57:32', '2025-08-19 00:57:32'),
+(3, 8, '2025-08-21', '<p>dadasdasdad</p>', '<p>ddasdasdasdswadasd</p>', '<p>asdasdasdasdasdasdas</p>', 'published', '2025-08-20 21:58:14', '2025-08-20 21:58:14');
+
 -- --------------------------------------------------------
 
 --
@@ -104,7 +113,8 @@ CREATE TABLE `jadwal` (
 --
 
 INSERT INTO `jadwal` (`id_jadwal`, `id_pendaftaran`, `id_mentor`, `tanggal_mulai`, `tanggal_akhir`, `jam_mulai`, `jam_akhir`, `hari`, `status`, `created_at`, `updated_at`) VALUES
-(6, 7, 1, '2025-08-15', '2025-10-18', '09:00:00', '15:00:00', 'senin,rabu,sabtu', 'scheduled', '2025-08-15 01:29:15', '2025-08-15 01:30:12');
+(6, 7, 1, '2025-08-15', '2025-10-18', '09:00:00', '15:00:00', 'senin,rabu,sabtu', 'scheduled', '2025-08-15 01:29:15', '2025-08-15 01:30:12'),
+(7, 8, 1, '2025-08-24', '2025-09-30', '09:00:00', '17:00:00', 'senin,kamis,jumat', 'scheduled', '2025-08-21 03:17:23', '2025-08-21 03:17:23');
 
 -- --------------------------------------------------------
 
@@ -188,7 +198,8 @@ CREATE TABLE `pendaftaran` (
 --
 
 INSERT INTO `pendaftaran` (`id_pendaftaran`, `id_peserta`, `judul_riset`, `penjelasan`, `minat_keilmuan`, `basis_sistem`, `status`, `created_at`, `updated_at`) VALUES
-(7, 7, 'Sistem Transparansi dan Monitoring Anggaran Daerah Berbasis Web', 'Penelitian ini bertujuan mengembangkan sistem berbasis web untuk mempublikasikan data anggaran pemerintah daerah secara real-time dan mudah diakses masyarakat. Sistem ini akan menampilkan informasi alokasi, penggunaan, dan progres realisasi anggaran dalam bentuk tabel interaktif dan visualisasi grafik. Manfaatnya adalah meningkatkan transparansi, mencegah potensi penyalahgunaan dana, serta memperkuat kepercayaan publik terhadap pengelolaan keuangan daerah.', 'Web Development', 'Web Application', 'diterima', '2025-08-15 01:25:02', '2025-08-15 01:29:15');
+(7, 7, 'Sistem Transparansi dan Monitoring Anggaran Daerah Berbasis Web', 'Penelitian ini bertujuan mengembangkan sistem berbasis web untuk mempublikasikan data anggaran pemerintah daerah secara real-time dan mudah diakses masyarakat. Sistem ini akan menampilkan informasi alokasi, penggunaan, dan progres realisasi anggaran dalam bentuk tabel interaktif dan visualisasi grafik. Manfaatnya adalah meningkatkan transparansi, mencegah potensi penyalahgunaan dana, serta memperkuat kepercayaan publik terhadap pengelolaan keuangan daerah.', 'Web Development', 'Web Application', 'diterima', '2025-08-15 01:25:02', '2025-08-15 01:29:15'),
+(8, 8, 'bikin orong ketawa dalam 1 detik', 'tertawalah menangislah', 'Psikologi', 'website', 'diterima', '2025-08-21 03:15:31', '2025-08-21 03:17:23');
 
 -- --------------------------------------------------------
 
@@ -232,7 +243,8 @@ CREATE TABLE `peserta` (
 --
 
 INSERT INTO `peserta` (`id_peserta`, `nama`, `email`, `password`, `nomor_wa`, `instansi`, `fakultas`, `created_at`, `updated_at`) VALUES
-(7, 'Nugraha abi Santana', 'nugrahaabisantana@gmail.com', '$2y$12$lDva4hsAL0Ayk9ByBkfzYOQml168SAYh0sthVrmRF5pqYh8tJp2Fm', '+62895320904658', 'Universitas Indonesia', 'Fakultas ilmu komputer', '2025-08-15 01:25:02', '2025-08-15 01:38:05');
+(7, 'Nugraha abi Santana', 'nugrahaabisantana@gmail.com', '$2y$12$lDva4hsAL0Ayk9ByBkfzYOQml168SAYh0sthVrmRF5pqYh8tJp2Fm', '+62895320904658', 'Universitas Indonesia', 'Fakultas ilmu komputer', '2025-08-15 01:25:02', '2025-08-15 01:38:05'),
+(8, 'Tohir', 'tohir@gmail.com', '$2y$12$YzlwI/kmIlM21nUFMPcH3ui0jW.GD4cdNXQiolOGV5Y.2XnVEJK2K', '+62895618270001', 'Universitas Batam', 'Pengecatan', '2025-08-21 03:15:31', '2025-08-21 03:15:31');
 
 -- --------------------------------------------------------
 
@@ -248,6 +260,18 @@ CREATE TABLE `update_progress` (
   `persentase` decimal(5,2) NOT NULL,
   `created_at` timestamp NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `update_progress`
+--
+
+INSERT INTO `update_progress` (`id_progress`, `id_catatan`, `tanggal_update`, `deskripsi_progress`, `persentase`, `created_at`) VALUES
+(4, 1, '2025-08-19', 'anujh', '50.00', '2025-08-18 21:35:19'),
+(5, 1, '2025-08-19', 'edadaw', '58.00', '2025-08-18 21:35:29'),
+(6, 1, '2025-08-19', 'xSXSX', '72.00', '2025-08-18 21:49:58'),
+(7, 1, '2025-08-19', 'dasdcaad', '12.00', '2025-08-18 21:54:46'),
+(8, 2, '2025-08-19', 'vbgvvgvgvgv', '32.00', '2025-08-19 01:14:56'),
+(9, 3, '2025-08-21', 'dwdawda', '21.00', '2025-08-20 21:58:22');
 
 -- --------------------------------------------------------
 
@@ -362,7 +386,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `catatan_bimbingan`
 --
 ALTER TABLE `catatan_bimbingan`
-  MODIFY `id_catatan` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_catatan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -374,7 +398,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `jadwal`
 --
 ALTER TABLE `jadwal`
-  MODIFY `id_jadwal` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_jadwal` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `mentor`
@@ -392,7 +416,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `pendaftaran`
 --
 ALTER TABLE `pendaftaran`
-  MODIFY `id_pendaftaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_pendaftaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `personal_access_tokens`
@@ -404,13 +428,13 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `peserta`
 --
 ALTER TABLE `peserta`
-  MODIFY `id_peserta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_peserta` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `update_progress`
 --
 ALTER TABLE `update_progress`
-  MODIFY `id_progress` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_progress` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`
