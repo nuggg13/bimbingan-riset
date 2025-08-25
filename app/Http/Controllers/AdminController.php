@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
+use App\Models\Mentor;
 use App\Models\Peserta;
 use App\Models\Pendaftaran;
 
@@ -50,8 +51,22 @@ class AdminController extends Controller
         $totalMahasiswa = Peserta::count();
         $totalPendaftaran = Pendaftaran::count();
         $totalPending = Pendaftaran::where('status', 'pending')->count();
-        $totalMentor = 0; // Belum ada tabel mentor, jadi tetap 0
+        $totalMentor = Mentor::count();
         
-        return view('admin.dashboard', compact('admin', 'totalMahasiswa', 'totalPendaftaran', 'totalPending', 'totalMentor'));
+        // Ambil 5 pendaftaran terbaru yang statusnya pending
+        $pendaftaranTerbaru = Pendaftaran::with('peserta')
+                                        ->where('status', 'pending')
+                                        ->orderBy('created_at', 'desc')
+                                        ->take(5)
+                                        ->get();
+
+        return view('admin.dashboard', compact(
+            'admin', 
+            'totalMahasiswa', 
+            'totalPendaftaran', 
+            'totalPending', 
+            'totalMentor',
+            'pendaftaranTerbaru'
+        ));
     }
 }
